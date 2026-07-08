@@ -1,0 +1,607 @@
+/* ─────────────────────────────────────────────────────────
+   Maple Widget — Complete Styles
+   All styles are injected into the Shadow DOM
+   so they never leak into or get affected by the host site.
+   ───────────────────────────────────────────────────────── */
+
+/* ── Design Tokens ── */
+:host {
+  --maple-primary: #4A90E2;
+  --maple-primary-dark: #1E3A8A;
+  --maple-mint: #E8F5E9;
+  --maple-white: #FFFFFF;
+  --maple-offwhite: #F8FAFC;
+  --maple-charcoal: #334155;
+  --maple-gray-100: #F1F5F9;
+  --maple-gray-200: #E2E8F0;
+  --maple-gray-300: #CBD5E1;
+  --maple-gray-400: #94A3B8;
+  --maple-gray-500: #64748B;
+  --maple-green: #22C55E;
+  --maple-red: #EF4444;
+  --maple-radius: 16px;
+  --maple-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --maple-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --maple-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --maple-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  all: initial;
+  font-family: var(--maple-font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--maple-charcoal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Widget Container ── */
+.maple-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2147483647; /* Maximum z-index — always on top */
+  font-family: var(--maple-font);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* ── Floating Bubble ── */
+.maple-bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.maple-bubble {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--maple-primary), var(--maple-primary-dark));
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--maple-shadow);
+  transition: transform var(--maple-transition), box-shadow var(--maple-transition);
+}
+
+.maple-bubble:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 40px rgba(74, 144, 226, 0.35);
+}
+
+.maple-bubble:active {
+  transform: scale(0.95);
+}
+
+/* ── Proactive Greeting ── */
+.maple-greeting {
+  background: var(--maple-white);
+  border-radius: var(--maple-radius);
+  padding: 14px 18px;
+  max-width: 280px;
+  box-shadow: var(--maple-shadow);
+  cursor: pointer;
+  position: relative;
+  animation: maple-slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid var(--maple-gray-200);
+}
+
+.maple-greeting__text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--maple-charcoal);
+  line-height: 1.5;
+}
+
+.maple-greeting__dismiss {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--maple-gray-400);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.maple-greeting__dismiss:hover {
+  color: var(--maple-charcoal);
+}
+
+/* ── Chat Window ── */
+.maple-window {
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 520px;
+  max-height: calc(100vh - 120px);
+  background: var(--maple-white);
+  border-radius: var(--maple-radius);
+  box-shadow: var(--maple-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: maple-slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid var(--maple-gray-200);
+}
+
+/* ── Window Header ── */
+.maple-window__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, var(--maple-primary), var(--maple-primary-dark));
+  color: white;
+  flex-shrink: 0;
+}
+
+.maple-window__header-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.maple-window__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.maple-window__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.maple-window__status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.maple-window__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--maple-green);
+  display: inline-block;
+  animation: maple-pulse 2s ease-in-out infinite;
+}
+
+.maple-window__close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--maple-transition);
+}
+
+.maple-window__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Messages Area ── */
+.maple-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--maple-offwhite);
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar styling */
+.maple-messages::-webkit-scrollbar {
+  width: 5px;
+}
+
+.maple-messages::-webkit-scrollbar-thumb {
+  background: var(--maple-gray-300);
+  border-radius: 10px;
+}
+
+.maple-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── Welcome State ── */
+.maple-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 16px;
+  gap: 8px;
+  flex: 1;
+}
+
+.maple-welcome__icon {
+  font-size: 40px;
+  margin-bottom: 4px;
+}
+
+.maple-welcome__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--maple-charcoal);
+  margin: 0;
+}
+
+.maple-welcome__text {
+  font-size: 13px;
+  color: var(--maple-gray-500);
+  margin: 0;
+  max-width: 260px;
+  line-height: 1.6;
+}
+
+/* ── Message Bubbles ── */
+.maple-message {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  line-height: 1.4;
+  animation: maple-fade-in 0.3s ease-out;
+}
+
+.maple-greeting__content {
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  padding-right: 18px;
+}
+
+/* Typing indicator in greeting */
+.maple-greeting__typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.maple-greeting__typing .maple-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #64748b;
+  border-radius: 50%;
+  animation: maple-bounce 1.4s infinite ease-in-out;
+  opacity: 0.7;
+}
+.maple-greeting__typing .maple-dot:nth-child(1) { animation-delay: -0.32s; }
+.maple-greeting__typing .maple-dot:nth-child(2) { animation-delay: -0.16s; }
+
+.maple-message--user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+  max-width: 85%;
+}
+
+.maple-message--assistant {
+  align-self: flex-start;
+  max-width: 85%;
+}
+
+.maple-message__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--maple-mint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.maple-message__bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.maple-message--user .maple-message__bubble {
+  background: linear-gradient(135deg, var(--maple-primary), var(--maple-primary-dark));
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.maple-message--assistant .maple-message__bubble {
+  background: var(--maple-white);
+  color: var(--maple-charcoal);
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--maple-gray-200);
+}
+
+/* Markdown specific styling inside messages */
+.maple-markdown p { margin: 0 0 8px 0; }
+.maple-markdown p:last-child { margin: 0; }
+.maple-markdown strong { font-weight: 600; color: #1e3a8a; }
+.maple-message--user .maple-markdown strong { color: #ffffff; }
+.maple-markdown ul, .maple-markdown ol { margin: 8px 0; padding-left: 20px; }
+.maple-markdown li { margin-bottom: 4px; }
+
+/* Markdown Tables */
+.maple-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 13px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.maple-markdown th, .maple-markdown td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+.maple-markdown th {
+  background: #f1f5f9;
+  font-weight: 600;
+  color: #334155;
+}
+.maple-markdown tr:last-child td {
+  border-bottom: none;
+}
+
+/* Custom Booking Widget */
+.maple-booking-widget {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.maple-booking-widget__icon {
+  background: #eff6ff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.maple-booking-widget__content {
+  flex: 1;
+}
+.maple-booking-widget__title {
+  font-weight: 600;
+  color: #1e3a8a;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.maple-booking-widget__date {
+  font-weight: 500;
+  color: #334155;
+  font-size: 13px;
+}
+.maple-booking-widget__id {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Quick Actions */
+.maple-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.maple-quick-action {
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 100px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.maple-quick-action:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+/* ── Typing Indicator ── */
+.maple-typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px !important;
+}
+
+.maple-typing__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--maple-gray-400);
+  animation: maple-bounce 1.4s ease-in-out infinite;
+}
+
+.maple-typing__dot:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.maple-typing__dot:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+/* ── Input Area ── */
+.maple-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--maple-gray-200);
+  background: var(--maple-white);
+  flex-shrink: 0;
+}
+
+.maple-input__field {
+  flex: 1;
+  border: 1px solid var(--maple-gray-200);
+  border-radius: 24px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-family: var(--maple-font);
+  color: var(--maple-charcoal);
+  background: var(--maple-offwhite);
+  outline: none;
+  transition: border-color var(--maple-transition), box-shadow var(--maple-transition);
+}
+
+.maple-input__field::placeholder {
+  color: var(--maple-gray-400);
+}
+
+.maple-input__field:focus {
+  border-color: var(--maple-primary);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.12);
+}
+
+.maple-input__send {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--maple-primary), var(--maple-primary-dark));
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--maple-transition), opacity var(--maple-transition);
+}
+
+.maple-input__send:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.maple-input__send:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.maple-input__send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Footer ── */
+.maple-window__footer {
+  text-align: center;
+  padding: 6px;
+  font-size: 11px;
+  color: var(--maple-gray-400);
+  background: var(--maple-white);
+  border-top: 1px solid var(--maple-gray-100);
+  flex-shrink: 0;
+}
+
+.maple-window__footer strong {
+  color: var(--maple-primary);
+}
+
+/* ── Animations ── */
+@keyframes maple-slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes maple-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes maple-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes maple-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ── Mobile Responsive ── */
+@media (max-width: 480px) {
+  .maple-widget {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .maple-window {
+    width: 100%;
+    max-width: 100%;
+    height: calc(100vh - 72px);
+    max-height: calc(100vh - 72px);
+    border-radius: 0;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .maple-bubble-wrapper {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .maple-greeting {
+    max-width: calc(100vw - 90px);
+  }
+}

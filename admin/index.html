@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maple Admin — Captured Leads</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      background: #F8FAFC;
+      color: #334155;
+      min-height: 100vh;
+    }
+
+    /* ── Auth Screen ── */
+    .auth-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .auth-card {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .auth-card__icon { font-size: 48px; margin-bottom: 16px; }
+    .auth-card__title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .auth-card__subtitle { font-size: 14px; color: #64748B; margin-bottom: 24px; }
+
+    .auth-card input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .auth-card input:focus {
+      border-color: #4A90E2;
+      box-shadow: 0 0 0 3px rgba(74,144,226,0.12);
+    }
+
+    .auth-card button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #4A90E2, #1E3A8A);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .auth-card button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(74,144,226,0.3);
+    }
+
+    .auth-error {
+      color: #EF4444;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    /* ── Dashboard ── */
+    .dashboard {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .dashboard__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .dashboard__title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .dashboard__logout {
+      padding: 8px 16px;
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #64748B;
+      transition: background 0.2s;
+    }
+
+    .dashboard__logout:hover { background: #F1F5F9; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .stat-card__label { font-size: 12px; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card__value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+    .stat-card__value--urgent { color: #EF4444; }
+
+    /* ── Lead Cards ── */
+    .lead-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+      overflow: hidden;
+      border-left: 4px solid #4A90E2;
+      transition: box-shadow 0.2s;
+    }
+
+    .lead-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .lead-card--urgent { border-left-color: #EF4444; }
+
+    .lead-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      cursor: pointer;
+      gap: 12px;
+    }
+
+    .lead-card__info { flex: 1; }
+    .lead-card__name { font-weight: 600; font-size: 15px; }
+    .lead-card__meta { font-size: 13px; color: #64748B; margin-top: 2px; }
+
+    .lead-card__badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .badge--urgent { background: #FEE2E2; color: #DC2626; }
+    .badge--normal { background: #DCFCE7; color: #16A34A; }
+    .badge--email { background: #E0F2FE; color: #0284C7; }
+    .badge--phone { background: #F3E8FF; color: #7C3AED; }
+
+    .lead-card__expand {
+      font-size: 18px;
+      color: #94A3B8;
+      transition: transform 0.2s;
+      user-select: none;
+    }
+
+    .lead-card__expand--open { transform: rotate(180deg); }
+
+    /* ── Transcript ── */
+    .lead-card__body {
+      padding: 0 20px 20px;
+      border-top: 1px solid #F1F5F9;
+    }
+
+    .transcript {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .transcript__msg {
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 85%;
+    }
+
+    .transcript__msg--user {
+      background: #E0F2FE;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .transcript__msg--assistant {
+      background: #F1F5F9;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .transcript__msg strong {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      display: block;
+      margin-bottom: 2px;
+      opacity: 0.7;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: #94A3B8;
+    }
+
+    .empty-state__icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state__text { font-size: 15px; }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #64748B;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // ─────────────────────────────────────────────────────
+    // Maple Admin — Simple SPA (no framework needed)
+    // ─────────────────────────────────────────────────────
+
+    const API_BASE = window.location.origin;
+    let token = localStorage.getItem('maple_admin_token') || '';
+    let leads = [];
+    let expandedLeads = new Set();
+
+    function render() {
+      const app = document.getElementById('app');
+      app.innerHTML = token ? renderDashboard() : renderAuth();
+      attachListeners();
+    }
+
+    // ── Auth Screen ──
+    function renderAuth() {
+      return `
+        <div class="auth-screen">
+          <div class="auth-card">
+            <div class="auth-card__icon">🍁</div>
+            <h1 class="auth-card__title">Maple Admin</h1>
+            <p class="auth-card__subtitle">Enter your admin token to view captured leads</p>
+            <input type="password" id="tokenInput" placeholder="Admin token" />
+            <button id="loginBtn">Sign In</button>
+            <div id="authError" class="auth-error"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ── Dashboard ──
+    function renderDashboard() {
+      const totalLeads = leads.length;
+      const urgentLeads = leads.filter(l => l.urgency === 'urgent').length;
+      const todayLeads = leads.filter(l => {
+        const d = new Date(l.createdAt);
+        const now = new Date();
+        return d.toDateString() === now.toDateString();
+      }).length;
+
+      return `
+        <div class="dashboard">
+          <div class="dashboard__header">
+            <h1 class="dashboard__title">🍁 Maple Admin</h1>
+            <button class="dashboard__logout" id="logoutBtn">Sign Out</button>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-card__label">Total Leads</div>
+              <div class="stat-card__value">${totalLeads}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__label">Today</div>
+              <div class="stat-card__value">${todayLeads}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__label">Urgent</div>
+              <div class="stat-card__value stat-card__value--urgent">${urgentLeads}</div>
+            </div>
+          </div>
+
+          ${leads.length === 0 ? `
+            <div class="empty-state">
+              <div class="empty-state__icon">📋</div>
+              <div class="empty-state__text">No leads captured yet. They'll appear here in real-time.</div>
+            </div>
+          ` : leads.map(renderLeadCard).join('')}
+        </div>
+      `;
+    }
+
+    function renderLeadCard(lead) {
+      const isExpanded = expandedLeads.has(lead.id);
+      const date = new Date(lead.createdAt).toLocaleString();
+
+      return `
+        <div class="lead-card ${lead.urgency === 'urgent' ? 'lead-card--urgent' : ''}">
+          <div class="lead-card__header" data-lead-id="${lead.id}">
+            <div class="lead-card__info">
+              <div class="lead-card__name">${lead.visitorName}</div>
+              <div class="lead-card__meta">${lead.contactValue} · ${date}</div>
+              <div class="lead-card__meta">${lead.summary || 'No summary'}</div>
+            </div>
+            <div class="lead-card__badges">
+              <span class="badge badge--${lead.urgency}">${lead.urgency === 'urgent' ? '🔴 Urgent' : '🟢 Normal'}</span>
+              <span class="badge badge--${lead.contactMethod}">${lead.contactMethod === 'email' ? '📧 Email' : '📱 Phone'}</span>
+            </div>
+            <span class="lead-card__expand ${isExpanded ? 'lead-card__expand--open' : ''}">▼</span>
+          </div>
+          ${isExpanded ? `
+            <div class="lead-card__body">
+              <div class="transcript">
+                ${(lead.transcript || []).map(msg => `
+                  <div class="transcript__msg transcript__msg--${msg.role}">
+                    <strong>${msg.role === 'user' ? 'Visitor' : 'Maple'}</strong>
+                    ${msg.text}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    // ── Event Handlers ──
+    function attachListeners() {
+      const loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', login);
+        document.getElementById('tokenInput').addEventListener('keydown', e => {
+          if (e.key === 'Enter') login();
+        });
+      }
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          token = '';
+          localStorage.removeItem('maple_admin_token');
+          render();
+        });
+      }
+
+      // Lead expand/collapse
+      document.querySelectorAll('.lead-card__header').forEach(header => {
+        header.addEventListener('click', () => {
+          const id = header.dataset.leadId;
+          if (expandedLeads.has(id)) {
+            expandedLeads.delete(id);
+          } else {
+            expandedLeads.add(id);
+          }
+          render();
+        });
+      });
+    }
+
+    async function login() {
+      const input = document.getElementById('tokenInput');
+      const error = document.getElementById('authError');
+      const val = input.value.trim();
+
+      if (!val) {
+        error.textContent = 'Please enter a token';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/leads`, {
+          headers: { 'Authorization': `Bearer ${val}` }
+        });
+
+        if (!res.ok) {
+          error.textContent = res.status === 403 ? 'Invalid token' : 'Authentication failed';
+          return;
+        }
+
+        const data = await res.json();
+        token = val;
+        localStorage.setItem('maple_admin_token', val);
+        leads = data.leads || [];
+        render();
+      } catch (err) {
+        error.textContent = 'Could not connect to API';
+      }
+    }
+
+    async function fetchLeads() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/leads`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          leads = data.leads || [];
+          render();
+        }
+      } catch (err) {
+        console.error('Failed to fetch leads:', err);
+      }
+    }
+
+    // Initial render
+    render();
+
+    // If already authenticated, fetch leads
+    if (token) fetchLeads();
+
+    // Auto-refresh every 15 seconds
+    setInterval(fetchLeads, 15000);
+  </script>
+</body>
+</html>

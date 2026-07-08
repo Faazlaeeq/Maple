@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maplewood Family Dental — Widget Test Page</title>
+  <style>
+    /* This simulates a real host website with its own styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #f0f4f8;
+      color: #333;
+      line-height: 1.6;
+    }
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+      color: white;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 2.5em;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+    .content {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+    .content h2 {
+      color: #1e3a5f;
+      margin-bottom: 16px;
+    }
+    .content p {
+      margin-bottom: 16px;
+    }
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+    }
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>🦷 Maplewood Family Dental</h1>
+    <p>Your Neighborhood Smile Specialists Since 2017</p>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h2>Welcome to Our Practice</h2>
+      <p>
+        Located in the heart of Windsor Park, Austin TX, we've been serving families
+        with compassionate, high-quality dental care for over 8 years. Whether you need
+        a routine cleaning or a complete smile makeover, our team is here for you.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Our Services</h2>
+      <p>Routine Cleanings & Exams • Emergency Dental Care • Teeth Whitening • Dental Implants • Invisalign • Crowns & Bridges • Root Canal Therapy • Pediatric Dentistry • Gum Treatment • Cosmetic Bonding & Veneers</p>
+    </div>
+
+    <div class="card">
+      <h2>Contact Us</h2>
+      <p>📍 4821 Maplewood Drive, Suite 200, Austin, TX 78723</p>
+      <p>📞 (512) 555-0187</p>
+      <p>📧 hello@maplewoodfamilydental.com</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Maplewood Family Dental. All rights reserved.</p>
+    <p style="margin-top:8px;font-size:12px;color:#999;">
+      This is a test page to demonstrate the Maple chat widget.
+      The widget bubble should appear in the bottom-right corner.
+    </p>
+  </footer>
+
+  <!-- ╔══════════════════════════════════════════════════════════╗ -->
+  <!-- ║  THIS IS THE ONLY LINE A CLIENT NEEDS TO ADD            ║ -->
+  <!-- ║  Copy this script tag and paste before </body>          ║ -->
+  <!-- ╚══════════════════════════════════════════════════════════╝ -->
+  <script type="module" src="/src/main.tsx" data-maple-api="http://localhost:3001"></script>
+</body>
+</html>

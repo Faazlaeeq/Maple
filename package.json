@@ -1,0 +1,20 @@
+{
+  "name": "maple",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Maple — AI Front Desk Assistant for local service businesses",
+  "workspaces": [
+    "server",
+    "widget"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace=server",
+    "dev:widget": "npm run dev --workspace=widget",
+    "build:server": "npm run build --workspace=server",
+    "build:widget": "npm run build --workspace=widget",
+    "build": "npm run build:server && npm run build:widget"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

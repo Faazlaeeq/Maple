@@ -1,0 +1,178 @@
+{
+  "businessName": "Maplewood Family Dental",
+  "tagline": "Your Neighborhood Smile Specialists Since 2017",
+  "location": {
+    "address": "4821 Maplewood Drive, Suite 200",
+    "city": "Austin",
+    "state": "TX",
+    "zip": "78723",
+    "neighborhood": "Windsor Park"
+  },
+  "contact": {
+    "phone": "(512) 555-0187",
+    "email": "hello@maplewoodfamilydental.com",
+    "website": "https://www.maplewoodfamilydental.com"
+  },
+  "hours": {
+    "monday": "8:00 AM – 5:00 PM",
+    "tuesday": "8:00 AM – 6:00 PM",
+    "wednesday": "8:00 AM – 5:00 PM",
+    "thursday": "9:00 AM – 7:00 PM",
+    "friday": "8:00 AM – 3:00 PM",
+    "saturday": "9:00 AM – 1:00 PM (1st & 3rd Saturday only)",
+    "sunday": "Closed"
+  },
+  "team": [
+    {
+      "name": "Dr. Sarah Chen, DDS",
+      "role": "Lead Dentist & Practice Owner",
+      "bio": "UT Health San Antonio graduate with 14 years of experience. Specializes in restorative and cosmetic dentistry. Known for her calm demeanor and thorough explanations."
+    },
+    {
+      "name": "Dr. Marcus Rivera, DMD",
+      "role": "Associate Dentist",
+      "bio": "Baylor College of Dentistry graduate. Focuses on pediatric and family dentistry. Fluent in English and Spanish."
+    },
+    {
+      "name": "Jamie Okafor, RDH",
+      "role": "Lead Hygienist",
+      "bio": "12 years of experience. Certified in laser therapy and periodontal care. Patients love her gentle touch."
+    }
+  ],
+  "services": [
+    {
+      "name": "Routine Cleanings & Exams",
+      "description": "Comprehensive dental exams, professional cleanings, and digital X-rays. Recommended every 6 months.",
+      "priceRange": "$150–$250 (before insurance)"
+    },
+    {
+      "name": "Emergency Dental Care",
+      "description": "Same-day appointments available for dental emergencies including severe pain, broken teeth, and infections. Call us immediately.",
+      "priceRange": "Varies by treatment needed"
+    },
+    {
+      "name": "Teeth Whitening",
+      "description": "In-office Zoom whitening (1 hour, dramatic results) and custom take-home whitening trays.",
+      "priceRange": "$299 in-office / $199 take-home"
+    },
+    {
+      "name": "Dental Implants",
+      "description": "Full implant placement and restoration. Free consultation available. We use Nobel Biocare implant systems.",
+      "priceRange": "$3,000–$5,000 per implant (includes crown)"
+    },
+    {
+      "name": "Invisalign Clear Aligners",
+      "description": "Certified Invisalign provider. Free smile assessment. Treatment plans typically 6–18 months.",
+      "priceRange": "$3,500–$6,000 (payment plans available)"
+    },
+    {
+      "name": "Crowns & Bridges",
+      "description": "Same-day CEREC crowns available. Porcelain, zirconia, and PFM options.",
+      "priceRange": "$800–$1,500 per crown"
+    },
+    {
+      "name": "Root Canal Therapy",
+      "description": "Gentle root canal treatment with modern rotary instruments. Most patients report little to no discomfort.",
+      "priceRange": "$700–$1,200"
+    },
+    {
+      "name": "Pediatric Dentistry",
+      "description": "Kid-friendly dental care for ages 2+. Sealants, fluoride treatments, and cavity prevention. Dr. Rivera specializes in making kids comfortable.",
+      "priceRange": "$100–$200 for routine visits"
+    },
+    {
+      "name": "Periodontal (Gum) Treatment",
+      "description": "Deep cleanings (scaling and root planing), gum disease management, and maintenance programs.",
+      "priceRange": "$200–$400 per quadrant"
+    },
+    {
+      "name": "Cosmetic Bonding & Veneers",
+      "description": "Fix chips, gaps, and discoloration. Composite bonding for minor fixes, porcelain veneers for complete smile makeovers.",
+      "priceRange": "$300–$600 bonding / $900–$2,000 per veneer"
+    }
+  ],
+  "insurance": {
+    "accepted": [
+      "Delta Dental",
+      "Cigna",
+      "Aetna",
+      "MetLife",
+      "Guardian",
+      "United Healthcare Dental",
+      "Humana",
+      "BlueCross BlueShield"
+    ],
+    "notes": "We accept most major PPO plans. We are out-of-network for HMO/DHMO plans. We'll file claims on your behalf and help you understand your coverage. No insurance? Ask about our Maplewood Smile Plan — $299/year covers two cleanings, exams, X-rays, and 15% off all other services."
+  },
+  "paymentOptions": [
+    "All major credit/debit cards",
+    "CareCredit financing (0% interest plans available)",
+    "In-house payment plans for treatments over $1,000",
+    "HSA/FSA accounts accepted"
+  ],
+  "newPatientInfo": {
+    "firstVisit": "Your first visit includes a comprehensive exam, full-mouth digital X-rays, and a personalized treatment plan discussion. Allow 60–75 minutes.",
+    "paperwork": "Complete your new patient forms online before your visit to save time. We'll send you a link when you book.",
+    "cancellationPolicy": "We ask for 24 hours' notice for cancellations or rescheduling. Late cancellations may be subject to a $50 fee."
+  },
+  "faqs": [
+    {
+      "question": "Are you accepting new patients?",
+      "answer": "Yes! We are always welcoming new patients of all ages. Call us or book online to schedule your first visit."
+    },
+    {
+      "question": "Do you offer payment plans?",
+      "answer": "Absolutely. We offer CareCredit financing with 0% interest options, plus in-house payment plans for treatments over $1,000. We never want cost to be a barrier to good dental care."
+    },
+    {
+      "question": "What if I have a dental emergency?",
+      "answer": "Call us immediately at (512) 555-0187. We reserve same-day slots for emergencies during business hours. If it's after hours, our voicemail will provide instructions for urgent situations."
+    },
+    {
+      "question": "How do I know if my insurance is accepted?",
+      "answer": "We accept most major PPO plans including Delta Dental, Cigna, Aetna, MetLife, and more. Call us with your insurance info and we'll verify your coverage before your visit — no surprises."
+    },
+    {
+      "question": "Is teeth whitening safe?",
+      "answer": "Yes, professional teeth whitening is safe when supervised by a dentist. We use the Zoom whitening system which is FDA-approved. We'll evaluate your teeth first to make sure you're a good candidate."
+    },
+    {
+      "question": "Do you see children?",
+      "answer": "Yes! Dr. Rivera specializes in pediatric dentistry and sees patients as young as 2 years old. We make dental visits fun and stress-free for kids."
+    },
+    {
+      "question": "What COVID safety measures do you have?",
+      "answer": "We follow all CDC and ADA guidelines. Enhanced sanitization between patients, HEPA air filtration in every operatory, and temperature screening at check-in."
+    },
+    {
+      "question": "How long does an Invisalign treatment take?",
+      "answer": "Most Invisalign treatments at our practice take between 6 and 18 months, depending on complexity. We offer a free smile assessment to give you a personalized timeline and cost estimate."
+    },
+    {
+      "question": "Do you offer sedation dentistry?",
+      "answer": "We offer nitrous oxide (laughing gas) for anxious patients and oral sedation for longer procedures. Let us know about any dental anxiety when you book — we'll make sure you're comfortable."
+    },
+    {
+      "question": "What's your cancellation policy?",
+      "answer": "We ask for 24 hours' notice if you need to cancel or reschedule. Late cancellations may incur a $50 fee. We understand emergencies happen — just communicate with us and we'll work with you."
+    }
+  ],
+  "uniqueSellingPoints": [
+    "Locally owned, not a corporate chain — Dr. Chen lives in Windsor Park",
+    "Open select Saturdays for working families",
+    "Same-day emergency appointments",
+    "Se habla Español (Dr. Rivera)",
+    "Same-day CEREC crowns — no temporary crowns, no second visit",
+    "Kid-friendly environment with a play area in the waiting room",
+    "Free second opinions on treatment plans from other practices"
+  ],
+  "reviews": {
+    "googleRating": 4.8,
+    "totalReviews": 342,
+    "highlights": [
+      "\"Dr. Chen took the time to explain everything and never pressured me into unnecessary treatments.\" — Maria G.",
+      "\"My 4-year-old actually looks forward to going to the dentist now. Dr. Rivera is amazing with kids.\" — Jason T.",
+      "\"Had a tooth emergency on a Thursday evening and they got me in first thing Friday morning. Lifesavers.\" — Priya K."
+    ]
+  }
+}
