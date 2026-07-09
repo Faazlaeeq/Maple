@@ -2,22 +2,20 @@
   "version": 2,
   "builds": [
     {
-      "src": "server/dist/index.js",
+      "src": "server/src/index.ts",
       "use": "@vercel/node"
     },
     {
-      "src": "widget/dist/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "admin/index.html",
-      "use": "@vercel/static"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "widget/dist"
+      }
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "server/dist/index.js" },
-    { "src": "/widget/(.*)", "dest": "widget/dist/$1" },
-    { "src": "/admin", "dest": "admin/index.html" }
+    { "src": "/api/(.*)", "dest": "/server/src/index.ts" },
+    { "src": "/widget/(.*)", "dest": "/$1" }
   ],
   "headers": [
     {
