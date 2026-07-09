@@ -38,13 +38,15 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/chat', chatRouter);
 app.use('/api/admin', adminRouter);
 
-// ── Start server ──
-app.listen(PORT, () => {
-  console.log(`\n🍁 Maple API running on http://localhost:${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/api/health`);
-  console.log(`   Chat:   POST http://localhost:${PORT}/api/chat`);
-  console.log(`   Admin:  GET  http://localhost:${PORT}/api/admin/leads\n`);
-});
+// ── Start server (Local only) ──
+if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`\n🍁 Maple API running on http://localhost:${PORT}`);
+    console.log(`   Health: http://localhost:${PORT}/api/health`);
+    console.log(`   Chat:   POST http://localhost:${PORT}/api/chat`);
+    console.log(`   Admin:  GET  http://localhost:${PORT}/api/admin/leads\n`);
+  });
+}
 
 export default app;
 
