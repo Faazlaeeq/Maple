@@ -11,6 +11,7 @@ export interface ChatMessage {
 
 /** Incoming request to POST /api/chat */
 export interface ChatRequest {
+  clinicId: string;
   sessionId: string;
   message: string;
   history: ChatMessage[];
