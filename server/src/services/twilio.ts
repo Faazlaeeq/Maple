@@ -2,11 +2,19 @@ import twilio from 'twilio';
 import { sendOtpEmail } from './email';
 import { ClinicProfile } from '../types';
 
-const isTwilioConfigured = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_VERIFY_SERVICE_SID);
+function sanitize(val?: string) {
+  return val ? val.replace(/^["']|["']$/g, '').trim() : undefined;
+}
+
+const accountSid = sanitize(process.env.TWILIO_ACCOUNT_SID);
+const authToken = sanitize(process.env.TWILIO_AUTH_TOKEN);
+export const verifyServiceSid = sanitize(process.env.TWILIO_VERIFY_SERVICE_SID);
+
+const isTwilioConfigured = !!(accountSid && authToken && verifyServiceSid);
 
 let client: twilio.Twilio | null = null;
 if (isTwilioConfigured) {
-  client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  client = twilio(accountSid, authToken);
 }
 
 // In-memory mock storage for development
@@ -34,7 +42,7 @@ export async function sendVerificationOtp(contact: string, profile: ClinicProfil
       mockOtpStore.set(contact, emailCode); // Store for verification
       console.log(`[OTP] Email OTP sent to ${contact}`);
     } else {
-      await client!.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID!)
+      await client!.verify.v2.services(verifyServiceSid!)
         .verifications
         .create({ to: contact, channel: 'sms' });
       console.log(`[Twilio] OTP sent to ${contact}`);
@@ -61,7 +69,7 @@ export async function checkVerificationOtp(contact: string, code: string): Promi
   }
 
   try {
-    const verificationCheck = await client!.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID!)
+    const verificationCheck = await client!.verify.v2.services(verifyServiceSid!)
       .verificationChecks
       .create({ to: contact, code });
       
