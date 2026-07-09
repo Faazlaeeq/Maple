@@ -169,10 +169,10 @@ export async function getClinicProfile(clinicId: string): Promise<ClinicProfile 
   if (clinicId === 'maplewood') {
     try {
       const knowledgeBase = JSON.parse(
-        fs.readFileSync(path.join(__dirname, '../../knowledge/maplewood.json'), 'utf-8')
+        fs.readFileSync(path.join(__dirname, '../knowledge/maplewood.json'), 'utf-8')
       );
       const systemPrompt = fs.readFileSync(
-        path.join(__dirname, '../../prompts/system-prompt.md'),
+        path.join(__dirname, '../prompts/system-prompt.md'),
         'utf-8'
       );
 

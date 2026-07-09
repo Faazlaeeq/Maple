@@ -39,7 +39,7 @@ app.use('/api/chat', chatRouter);
 app.use('/api/admin', adminRouter);
 
 // ── Start server (Local only) ──
-if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`\n🍁 Maple API running on http://localhost:${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/api/health`);
@@ -48,5 +48,5 @@ if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
   });
 }
 
-export default app;
+module.exports = app;
 
