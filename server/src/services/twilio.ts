@@ -10,7 +10,12 @@ const accountSid = sanitize(process.env.TWILIO_ACCOUNT_SID);
 const authToken = sanitize(process.env.TWILIO_AUTH_TOKEN);
 export const verifyServiceSid = sanitize(process.env.TWILIO_VERIFY_SERVICE_SID);
 
-const isTwilioConfigured = !!(accountSid && authToken && verifyServiceSid);
+const isTwilioConfigured = !!(
+  accountSid && 
+  accountSid.startsWith('AC') && 
+  authToken && 
+  verifyServiceSid
+);
 
 let client: twilio.Twilio | null = null;
 if (isTwilioConfigured) {
