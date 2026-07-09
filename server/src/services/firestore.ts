@@ -4,7 +4,9 @@
 // ─────────────────────────────────────────────────────────
 
 import admin from 'firebase-admin';
-import { LeadRecord } from '../types';
+import { LeadRecord, ClinicProfile } from '../types';
+import fs from 'fs';
+import path from 'path';
 
 let db: admin.firestore.Firestore | null = null;
 
@@ -144,4 +146,49 @@ export async function saveConversation(
       console.error('[Firestore] Failed to save conversation:', error);
     }
   }
+}
+
+/**
+ * Fetch a clinic profile from Firestore or fallback to local files for "maplewood".
+ */
+export async function getClinicProfile(clinicId: string): Promise<ClinicProfile | null> {
+  const firestore = getDb();
+  
+  if (firestore) {
+    try {
+      const doc = await firestore.collection('clinics').doc(clinicId).get();
+      if (doc.exists) {
+        return { id: doc.id, ...doc.data() } as ClinicProfile;
+      }
+    } catch (error) {
+      console.error('[Firestore] Failed to fetch clinic profile:', error);
+    }
+  }
+
+  // In-memory fallback specifically for the "maplewood" demo
+  if (clinicId === 'maplewood') {
+    try {
+      const knowledgeBase = JSON.parse(
+        fs.readFileSync(path.join(__dirname, '../../knowledge/maplewood.json'), 'utf-8')
+      );
+      const systemPrompt = fs.readFileSync(
+        path.join(__dirname, '../../prompts/system-prompt.md'),
+        'utf-8'
+      );
+
+      return {
+        id: 'maplewood',
+        name: 'Maplewood Family Dental',
+        systemPrompt,
+        knowledgeBase,
+        googleCalendarId: process.env.GOOGLE_CALENDAR_ID || '',
+        notificationEmail: process.env.NOTIFICATION_EMAIL || ''
+      };
+    } catch (error) {
+      console.error('[Firestore] Failed to load local maplewood fallback:', error);
+      return null;
+    }
+  }
+
+  return null;
 }

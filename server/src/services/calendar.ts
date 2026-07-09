@@ -7,10 +7,9 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar'];
  * Initialize Google Calendar client.
  * Returns null if credentials are not configured.
  */
-function getCalendarClient() {
+function getCalendarClient(calendarId: string) {
   const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
   let privateKey = process.env.GOOGLE_PRIVATE_KEY;
-  const calendarId = process.env.GOOGLE_CALENDAR_ID;
 
   if (!clientEmail || !privateKey || !calendarId) {
     return null;
@@ -39,8 +38,8 @@ function getCalendarClient() {
  * For simplicity, we assume office hours are 9 AM to 5 PM, in 1-hour slots.
  * We fetch existing events and remove those slots from our available list.
  */
-export async function getAvailableSlots(dateStr: string): Promise<string[]> {
-  const client = getCalendarClient();
+export async function getAvailableSlots(dateStr: string, calendarId: string): Promise<string[]> {
+  const client = getCalendarClient(calendarId);
   
   // Return dummy data if not configured (useful for development)
   if (!client) {
@@ -88,8 +87,8 @@ export async function getAvailableSlots(dateStr: string): Promise<string[]> {
 /**
  * Creates a calendar event for the booking and returns a Booking ID.
  */
-export async function bookAppointment(dateStr: string, timeStr: string, patientName: string, phone: string): Promise<{ eventId: string; bookingId: string }> {
-  const client = getCalendarClient();
+export async function bookAppointment(dateStr: string, timeStr: string, patientName: string, phone: string, calendarId: string): Promise<{ eventId: string; bookingId: string }> {
+  const client = getCalendarClient(calendarId);
   const bookingId = `MFD-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
   if (!client) {
@@ -138,8 +137,8 @@ export async function bookAppointment(dateStr: string, timeStr: string, patientN
 /**
  * Cancels an appointment given the Google Calendar Event ID.
  */
-export async function cancelAppointment(eventId: string): Promise<boolean> {
-  const client = getCalendarClient();
+export async function cancelAppointment(eventId: string, calendarId: string): Promise<boolean> {
+  const client = getCalendarClient(calendarId);
 
   if (!client) {
     console.log(`[Calendar Mock] Canceled event: ${eventId}`);

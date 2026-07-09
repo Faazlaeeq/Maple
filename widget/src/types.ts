@@ -9,6 +9,7 @@ export interface ChatMessage {
 }
 
 export interface ChatRequest {
+  clinicId: string;
   sessionId: string;
   message: string;
   history: ChatMessage[];

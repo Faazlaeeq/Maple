@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maple Promo Mock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: #F8FAFC; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex h-screen w-screen text-slate-800 font-sans">
+    
+    <!-- LEFT: User Device (Mobile Mockup) -->
+    <div class="w-1/2 h-full flex items-center justify-center bg-slate-100 border-r border-slate-200">
+        <div class="w-[360px] h-[640px] bg-white rounded-[40px] shadow-2xl border-[8px] border-slate-800 relative overflow-hidden flex flex-col">
+            <!-- Header -->
+            <div class="bg-emerald-800 text-white p-4 pt-8 shadow-md">
+                <div class="font-bold text-lg">Maplewood Dental AI</div>
+                <div class="text-emerald-200 text-xs">Online</div>
+            </div>
+            
+            <!-- Chat Area -->
+            <div class="flex-grow p-4 space-y-4 overflow-y-auto" id="chatbox">
+                <div class="flex">
+                    <div class="bg-slate-100 p-3 rounded-2xl rounded-tl-sm text-sm max-w-[85%]">
+                        Hi! I'm Maple, the AI receptionist. How can I help you today?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-3 border-t border-slate-100 bg-white flex items-center gap-2">
+                <input type="text" id="chatInput" placeholder="Type a message..." class="flex-grow bg-slate-100 rounded-full px-4 py-2 text-sm focus:outline-none" />
+                <button id="sendBtn" class="bg-emerald-800 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center hover:bg-emerald-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Gmail Inbox (Desktop Mockup) -->
+    <div class="w-1/2 h-full bg-white flex flex-col">
+        <!-- Gmail Header -->
+        <div class="h-16 border-b border-slate-200 flex items-center px-6 gap-4 bg-slate-50">
+            <div class="flex items-center gap-2 text-slate-500">
+                <div class="w-6 h-4 flex flex-col justify-between">
+                    <div class="w-full h-0.5 bg-current"></div><div class="w-full h-0.5 bg-current"></div><div class="w-full h-0.5 bg-current"></div>
+                </div>
+                <span class="font-bold text-xl text-slate-600 ml-2">Inbox</span>
+            </div>
+        </div>
+
+        <!-- Inbox List -->
+        <div class="flex-grow" id="inbox">
+            <!-- Email Item -->
+            <div class="flex items-center px-4 py-3 border-b border-slate-100 bg-white text-sm">
+                <div class="w-64 font-bold text-slate-800">Google Calendar</div>
+                <div class="flex-grow font-bold text-slate-800">New Event: Staff Meeting</div>
+                <div class="font-bold text-slate-800 text-xs">8:00 AM</div>
+            </div>
+            <!-- Email Item -->
+            <div class="flex items-center px-4 py-3 border-b border-slate-100 bg-white text-sm text-slate-600">
+                <div class="w-64">Henry Schein</div>
+                <div class="flex-grow">Your dental supply order #49281 has shipped</div>
+                <div class="text-xs">Yesterday</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatbox = document.getElementById('chatbox');
+        const inbox = document.getElementById('inbox');
+
+        // Allow pressing Enter
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMsg();
+            }
+        });
+
+        sendBtn.addEventListener('click', sendMsg);
+
+        function sendMsg() {
+            const val = chatInput.value.trim();
+            if(!val) return;
+
+            // Add user msg
+            const userMsg = document.createElement('div');
+            userMsg.className = 'flex justify-end fade-in';
+            userMsg.innerHTML = `<div class="bg-emerald-800 text-white p-3 rounded-2xl rounded-tr-sm text-sm max-w-[85%]">${val}</div>`;
+            chatbox.appendChild(userMsg);
+            chatInput.value = '';
+
+            // Scroll to bottom
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            // Trigger AI response and email after 1.5s
+            setTimeout(() => {
+                // Add AI msg
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'flex fade-in';
+                aiMsg.innerHTML = `<div class="bg-slate-100 p-3 rounded-2xl rounded-tl-sm text-sm max-w-[85%]">I'd be happy to help you book an appointment! I've sent the request to the clinic and they will confirm shortly.</div>`;
+                chatbox.appendChild(aiMsg);
+                chatbox.scrollTop = chatbox.scrollHeight;
+
+                // Add Email to Inbox
+                const newEmail = document.createElement('div');
+                newEmail.className = 'flex items-center px-4 py-3 border-b border-slate-100 bg-emerald-50 text-sm fade-in cursor-pointer hover:shadow-md transition-shadow relative z-10';
+                newEmail.innerHTML = `
+                    <div class="w-64 font-bold text-slate-900">Maple AI Receptionist</div>
+                    <div class="flex-grow font-bold text-slate-900"><span class="bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded text-xs mr-2 uppercase tracking-wide">New Lead</span> Appointment Requested via Web Chat</div>
+                    <div class="font-bold text-emerald-600 text-xs">Just now</div>
+                `;
+                inbox.insertBefore(newEmail, inbox.firstChild);
+
+            }, 1200);
+        }
+    </script>
+</body>
+</html>

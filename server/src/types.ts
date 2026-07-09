@@ -54,3 +54,13 @@ export interface GeminiParsedResponse {
   requiresVerification?: boolean;
   emailToVerify?: string;
 }
+
+/** Clinic Profile (Multi-tenant) */
+export interface ClinicProfile {
+  id: string;
+  name: string;
+  systemPrompt: string;
+  knowledgeBase: any;
+  googleCalendarId: string;
+  notificationEmail: string;
+}

@@ -6,26 +6,38 @@
 import { ChatRequest, ChatResponse } from './types';
 
 /** Get the API base URL from the script tag's data attribute or default */
-function getApiUrl(): string {
-  // Look for the script tag that loaded us
-  const scripts = document.querySelectorAll('script[data-maple-api]');
+function getWidgetConfig(): { apiUrl: string, clinicId: string } {
+  const scripts = document.querySelectorAll('script');
   for (const script of scripts) {
     const url = script.getAttribute('data-maple-api');
-    if (url) return url;
+    if (url) {
+      return {
+        apiUrl: url,
+        clinicId: script.getAttribute('data-clinic-id') || 'maplewood'
+      };
+    }
   }
 
   // Fallback for development
-  return 'http://localhost:3001';
+  return {
+    apiUrl: 'http://localhost:3001',
+    clinicId: 'maplewood'
+  };
 }
 
-const API_URL = getApiUrl();
+const config = getWidgetConfig();
 
 /**
  * Send a chat message to the backend.
  * Returns the assistant's reply and whether a lead was captured.
  */
 export async function sendMessage(request: ChatRequest): Promise<ChatResponse> {
-  const response = await fetch(`${API_URL}/api/chat`, {
+  const payload = {
+    ...request,
+    clinicId: config.clinicId
+  };
+
+  const response = await fetch(`${config.apiUrl}/api/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

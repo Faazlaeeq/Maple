@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: oklch(100% 0 0);
+  --color-surface: oklch(98% 0 0);
+  --color-primary: oklch(35% 0.12 160);
+  --color-ink: oklch(15% 0.02 160);
+  --color-accent: oklch(92% 0.06 160); /* Fresh Mint Green */
+  --color-muted: oklch(55% 0.01 160);
+  
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  
+  --tracking-tightest: -0.04em;
+}
+
+body {
+  @apply bg-bg text-ink font-sans antialiased;
+}
+
+.text-on-primary {
+  @apply text-bg;
+}

@@ -1,5 +1,6 @@
 import twilio from 'twilio';
 import { sendOtpEmail } from './email';
+import { ClinicProfile } from '../types';
 
 const isTwilioConfigured = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_VERIFY_SERVICE_SID);
 
@@ -14,7 +15,7 @@ const mockOtpStore = new Map<string, string>();
 /**
  * Sends a 6-digit OTP to the specified phone number or email address.
  */
-export async function sendVerificationOtp(contact: string): Promise<void> {
+export async function sendVerificationOtp(contact: string, profile: ClinicProfile): Promise<void> {
   const isEmail = contact.includes('@');
 
   // If it's an email but no Resend key, or phone but no Twilio client, mock it.
@@ -29,7 +30,7 @@ export async function sendVerificationOtp(contact: string): Promise<void> {
 
   try {
     if (isEmail) {
-      await sendOtpEmail(contact, emailCode);
+      await sendOtpEmail(contact, emailCode, profile);
       mockOtpStore.set(contact, emailCode); // Store for verification
       console.log(`[OTP] Email OTP sent to ${contact}`);
     } else {

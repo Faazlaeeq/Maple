@@ -4,16 +4,16 @@
 // ─────────────────────────────────────────────────────────
 
 import { Resend } from 'resend';
-import { LeadRecord } from '../types';
+import { LeadRecord, ClinicProfile } from '../types';
 
 /**
  * Send a lead notification email to the business owner.
  * Per spec: must not block or crash the conversation flow on failure.
  * Returns true if sent successfully, false otherwise.
  */
-export async function sendLeadNotification(lead: LeadRecord): Promise<boolean> {
+export async function sendLeadNotification(lead: LeadRecord, profile: ClinicProfile): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
-  const notificationEmail = process.env.NOTIFICATION_EMAIL;
+  const notificationEmail = profile.notificationEmail;
 
   if (!apiKey || !notificationEmail) {
     console.warn('[Email] Resend not configured — skipping notification');
@@ -45,13 +45,13 @@ export async function sendLeadNotification(lead: LeadRecord): Promise<boolean> {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Maple Assistant <onboarding@resend.dev>',
+      from: `${profile.name} Assistant <onboarding@resend.dev>`,
       to: notificationEmail,
       subject: `${urgencyBadge} New Lead: ${lead.visitorName} — ${lead.summary}`,
       html: `
         <div style="font-family:'Inter',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
           <div style="background:linear-gradient(135deg,#4A90E2,#1E3A8A);color:white;padding:24px;border-radius:12px 12px 0 0;">
-            <h1 style="margin:0;font-size:20px;">🍁 Maple — New Lead Captured</h1>
+            <h1 style="margin:0;font-size:20px;">🍁 ${profile.name} — New Lead Captured</h1>
             <p style="margin:8px 0 0;opacity:0.9;font-size:14px;">${new Date(lead.createdAt).toLocaleString()}</p>
           </div>
           
@@ -101,7 +101,7 @@ export async function sendLeadNotification(lead: LeadRecord): Promise<boolean> {
 /**
  * Send a 6-digit OTP code to the given email address via Resend.
  */
-export async function sendOtpEmail(email: string, code: string): Promise<boolean> {
+export async function sendOtpEmail(email: string, code: string, profile: ClinicProfile): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn('[Email] Resend not configured — skipping OTP email');
@@ -111,13 +111,13 @@ export async function sendOtpEmail(email: string, code: string): Promise<boolean
   const resend = new Resend(apiKey);
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Maple Assistant <onboarding@resend.dev>',
+      from: `${profile.name} Assistant <onboarding@resend.dev>`,
       to: email,
-      subject: `Your Maplewood Dental Verification Code: ${code}`,
+      subject: `Your ${profile.name} Verification Code: ${code}`,
       html: `
         <div style="font-family:'Inter',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:20px;text-align:center;">
           <div style="background:linear-gradient(135deg,#4A90E2,#1E3A8A);color:white;padding:24px;border-radius:12px 12px 0 0;">
-            <h1 style="margin:0;font-size:20px;">🍁 Maplewood Family Dental</h1>
+            <h1 style="margin:0;font-size:20px;">🍁 ${profile.name}</h1>
           </div>
           <div style="border:1px solid #e0e0e0;border-top:none;padding:24px;border-radius:0 0 12px 12px;">
             <h2 style="color:#334155;margin:0 0 12px;">Your Verification Code</h2>
@@ -145,7 +145,7 @@ export async function sendOtpEmail(email: string, code: string): Promise<boolean
 /**
  * Send a booking confirmation email to the patient.
  */
-export async function sendBookingConfirmation(email: string, patientName: string, date: string, time: string, bookingId: string): Promise<boolean> {
+export async function sendBookingConfirmation(email: string, patientName: string, date: string, time: string, bookingId: string, profile: ClinicProfile): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn('[Email] Resend not configured — skipping booking confirmation email');
@@ -155,13 +155,13 @@ export async function sendBookingConfirmation(email: string, patientName: string
   const resend = new Resend(apiKey);
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Maple Assistant <onboarding@resend.dev>',
+      from: `${profile.name} Assistant <onboarding@resend.dev>`,
       to: email,
-      subject: `Appointment Confirmed: Maplewood Family Dental`,
+      subject: `Appointment Confirmed: ${profile.name}`,
       html: `
         <div style="font-family:'Inter',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
           <div style="background:linear-gradient(135deg,#4A90E2,#1E3A8A);color:white;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
-            <h1 style="margin:0;font-size:20px;">🍁 Maplewood Family Dental</h1>
+            <h1 style="margin:0;font-size:20px;">🍁 ${profile.name}</h1>
           </div>
           <div style="border:1px solid #e0e0e0;border-top:none;padding:24px;border-radius:0 0 12px 12px;">
             <h2 style="color:#334155;margin:0 0 16px;">Hi ${patientName},</h2>

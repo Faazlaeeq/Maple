@@ -6,25 +6,15 @@
 import { GoogleGenerativeAI, FunctionDeclaration, SchemaType } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
-import { ChatMessage, GeminiParsedResponse } from '../types';
+import { ChatMessage, GeminiParsedResponse, ClinicProfile } from '../types';
 import { getAvailableSlots, bookAppointment, cancelAppointment } from './calendar';
 import { checkVerificationOtp } from './twilio';
 import { sendBookingConfirmation } from './email';
 
-// Load knowledge base and system prompt at startup
-const knowledgeBase = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../knowledge/maplewood.json'), 'utf-8')
-);
-
-const systemPromptTemplate = fs.readFileSync(
-  path.join(__dirname, '../prompts/system-prompt.md'),
-  'utf-8'
-);
-
-function buildSystemPrompt(): string {
-  return systemPromptTemplate
-    .replace('{{businessName}}', knowledgeBase.businessName)
-    .replace('{{knowledgeBase}}', JSON.stringify(knowledgeBase, null, 2));
+function buildSystemPrompt(profile: ClinicProfile): string {
+  return profile.systemPrompt
+    .replace('{{businessName}}', profile.name)
+    .replace('{{knowledgeBase}}', JSON.stringify(profile.knowledgeBase, null, 2));
 }
 
 function formatHistory(history: ChatMessage[]): Array<{ role: string; parts: Array<{ text: string }> }> {
@@ -137,7 +127,8 @@ const tools = [{
 
 export async function chat(
   message: string,
-  history: ChatMessage[]
+  history: ChatMessage[],
+  profile: ClinicProfile
 ): Promise<GeminiParsedResponse> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -150,7 +141,7 @@ export async function chat(
   // We will leave responseMimeType as JSON since the system prompt demands JSON output.
   const model = genAI.getGenerativeModel({
     model: 'gemini-3.1-flash-lite',
-  systemInstruction: buildSystemPrompt(),
+  systemInstruction: buildSystemPrompt(profile),
     tools: tools,
     generationConfig: {
       temperature: 0.7,
@@ -174,32 +165,36 @@ export async function chat(
       let apiResponse: any = {};
 
       try {
+        const args = call.args as Record<string, any>;
+        
         if (call.name === 'check_availability') {
-          const slots = await getAvailableSlots(call.args.date as string);
+          const slots = await getAvailableSlots(args.date as string, profile.googleCalendarId);
           apiResponse = { availableSlots: slots };
         } else if (call.name === 'book_appointment') {
           const res = await bookAppointment(
-            call.args.date as string,
-            call.args.time as string,
-            call.args.patientName as string,
-            call.args.email as string
+            args.date as string,
+            args.time as string,
+            args.patientName as string,
+            args.email as string,
+            profile.googleCalendarId
           );
           
           // Send confirmation email asynchronously
           sendBookingConfirmation(
-            call.args.email as string, 
-            call.args.patientName as string, 
-            call.args.date as string, 
-            call.args.time as string, 
-            res.bookingId
+            args.email as string, 
+            args.patientName as string, 
+            args.date as string, 
+            args.time as string, 
+            res.bookingId,
+            profile
           ).catch(err => console.error('[Email] Async confirmation failed', err));
 
           apiResponse = { success: true, bookingId: res.bookingId, eventId: res.eventId };
         } else if (call.name === 'cancel_appointment') {
-          const success = await cancelAppointment(call.args.bookingId as string);
+          const success = await cancelAppointment(args.bookingId as string, profile.googleCalendarId);
           apiResponse = { success };
         } else if (call.name === 'verify_otp') {
-          const success = await checkVerificationOtp(call.args.email as string, call.args.code as string);
+          const success = await checkVerificationOtp(args.email as string, args.code as string);
           apiResponse = { verified: success };
         }
       } catch (err: any) {
