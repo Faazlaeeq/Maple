@@ -18,9 +18,9 @@ function getWidgetConfig(): { apiUrl: string, clinicId: string } {
     }
   }
 
-  // Fallback for development
+  // Fallback for development/production
   return {
-    apiUrl: 'http://localhost:3001',
+    apiUrl: import.meta.env.PROD ? 'https://maple-gray.vercel.app' : 'http://localhost:3001',
     clinicId: 'maplewood'
   };
 }
@@ -42,7 +42,7 @@ export async function sendMessage(request: ChatRequest): Promise<ChatResponse> {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(request),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
