@@ -33,6 +33,17 @@ router.post('/', async (req: Request, res: Response) => {
     // ── Call Gemini ──
     const geminiResponse = await geminiChat(message, history || [], profile);
 
+    // ── Trigger Verification ──
+    if (geminiResponse.requiresVerification && geminiResponse.emailToVerify) {
+      try {
+        await sendVerificationOtp(geminiResponse.emailToVerify, profile);
+      } catch (err) {
+        console.error('[Chat] Failed to send OTP:', err);
+        geminiResponse.reply = "I'm sorry, but I couldn't send the verification code to that email address. Could you please double-check your email or provide a different one?";
+        geminiResponse.requiresVerification = false;
+      }
+    }
+
     // ── Build updated transcript ──
     const now = new Date().toISOString();
     const updatedHistory: ChatMessage[] = [
@@ -46,13 +57,6 @@ router.post('/', async (req: Request, res: Response) => {
       await saveConversation(sessionId, updatedHistory);
     } catch (err) {
       console.error('[Chat] Failed to save conversation:', err);
-    }
-
-    // ── Trigger Verification ──
-    if (geminiResponse.requiresVerification && geminiResponse.emailToVerify) {
-      sendVerificationOtp(geminiResponse.emailToVerify, profile).catch((err) =>
-        console.error('[Chat] Failed to send OTP:', err)
-      );
     }
 
     // ── Handle lead capture ──
