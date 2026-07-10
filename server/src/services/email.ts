@@ -45,7 +45,7 @@ export async function sendLeadNotification(lead: LeadRecord, profile: ClinicProf
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `${profile.name} Assistant <onboarding@resend.dev>`,
+      from: `${profile.name} Assistant <assistant@orbitmatrix.org>`,
       to: notificationEmail,
       subject: `${urgencyBadge} New Lead: ${lead.visitorName} — ${lead.summary}`,
       html: `
@@ -111,7 +111,7 @@ export async function sendOtpEmail(email: string, code: string, profile: ClinicP
   const resend = new Resend(apiKey);
   try {
     const { data, error } = await resend.emails.send({
-      from: `${profile.name} Assistant <onboarding@resend.dev>`,
+      from: `${profile.name} Assistant <assistant@orbitmatrix.org>`,
       to: email,
       subject: `Your ${profile.name} Verification Code: ${code}`,
       html: `
