@@ -114,7 +114,7 @@ router.post('/', async (req: Request, res: Response) => {
 // ── Read-Only Chat View Route ──
 router.get('/:sessionId/view', async (req: Request, res: Response) => {
   try {
-    const { sessionId } = req.params;
+    const sessionId = req.params.sessionId as string;
     const conversation = await getConversation(sessionId);
     
     if (!conversation) {
