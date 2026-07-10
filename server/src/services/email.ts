@@ -155,7 +155,7 @@ export async function sendBookingConfirmation(email: string, patientName: string
   const resend = new Resend(apiKey);
   try {
     const { data, error } = await resend.emails.send({
-      from: `${profile.name} Assistant <onboarding@resend.dev>`,
+      from: `${profile.name} Assistant <assistant@orbitmatrix.org>`,
       to: email,
       subject: `Appointment Confirmed: ${profile.name}`,
       html: `
