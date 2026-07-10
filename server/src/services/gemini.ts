@@ -88,8 +88,9 @@ const bookAppointmentTool: FunctionDeclaration = {
       time: { type: SchemaType.STRING, description: "HH:mm format (e.g. 14:00)" },
       patientName: { type: SchemaType.STRING, description: "Full name of the patient" },
       phone: { type: SchemaType.STRING, description: "Valid phone number of the patient" },
+      email: { type: SchemaType.STRING, description: "Verified email address of the patient" },
     },
-    required: ["date", "time", "patientName", "phone"],
+    required: ["date", "time", "patientName", "phone", "email"],
   },
 };
 
@@ -179,6 +180,16 @@ export async function chat(
             profile.googleCalendarId
           );
           
+          // Send confirmation email asynchronously
+          sendBookingConfirmation(
+            args.email as string, 
+            args.patientName as string, 
+            args.date as string, 
+            args.time as string, 
+            res.bookingId,
+            profile
+          ).catch(err => console.error('[Email] Async confirmation failed', err));
+
           apiResponse = { success: true, bookingId: res.bookingId, eventId: res.eventId };
         } else if (call.name === 'cancel_appointment') {
           const success = await cancelAppointment(args.bookingId as string, profile.googleCalendarId);
