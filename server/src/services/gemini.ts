@@ -80,16 +80,16 @@ const checkAvailabilityTool: FunctionDeclaration = {
 
 const bookAppointmentTool: FunctionDeclaration = {
   name: "book_appointment",
-  description: "Book an appointment on the clinic's Google Calendar. MUST verify the user's phone number first via OTP.",
+  description: "Book an appointment on the clinic's Google Calendar. MUST ask the user for their valid phone number first.",
   parameters: {
     type: SchemaType.OBJECT,
     properties: {
       date: { type: SchemaType.STRING, description: "YYYY-MM-DD format" },
       time: { type: SchemaType.STRING, description: "HH:mm format (e.g. 14:00)" },
       patientName: { type: SchemaType.STRING, description: "Full name of the patient" },
-      email: { type: SchemaType.STRING, description: "Verified email address of the patient" },
+      phone: { type: SchemaType.STRING, description: "Valid phone number of the patient" },
     },
-    required: ["date", "time", "patientName", "email"],
+    required: ["date", "time", "patientName", "phone"],
   },
 };
 
@@ -108,21 +108,8 @@ const cancelAppointmentTool: FunctionDeclaration = {
   },
 };
 
-const verifyOtpTool: FunctionDeclaration = {
-  name: "verify_otp",
-  description: "Check if the 6-digit OTP code provided by the user matches the code sent to their phone.",
-  parameters: {
-    type: SchemaType.OBJECT,
-    properties: {
-      email: { type: SchemaType.STRING, description: "The email address the code was sent to" },
-      code: { type: SchemaType.STRING, description: "The 6-digit code the user typed in chat" },
-    },
-    required: ["email", "code"],
-  },
-};
-
 const tools = [{
-  functionDeclarations: [checkAvailabilityTool, bookAppointmentTool, cancelAppointmentTool, verifyOtpTool],
+  functionDeclarations: [checkAvailabilityTool, bookAppointmentTool, cancelAppointmentTool],
 }];
 
 export async function chat(
@@ -175,27 +162,14 @@ export async function chat(
             args.date as string,
             args.time as string,
             args.patientName as string,
-            args.email as string,
+            args.phone as string,
             profile.googleCalendarId
           );
           
-          // Send confirmation email asynchronously
-          sendBookingConfirmation(
-            args.email as string, 
-            args.patientName as string, 
-            args.date as string, 
-            args.time as string, 
-            res.bookingId,
-            profile
-          ).catch(err => console.error('[Email] Async confirmation failed', err));
-
           apiResponse = { success: true, bookingId: res.bookingId, eventId: res.eventId };
         } else if (call.name === 'cancel_appointment') {
           const success = await cancelAppointment(args.bookingId as string, profile.googleCalendarId);
           apiResponse = { success };
-        } else if (call.name === 'verify_otp') {
-          const success = await checkVerificationOtp(args.email as string, args.code as string);
-          apiResponse = { verified: success };
         }
       } catch (err: any) {
         apiResponse = { error: err.message || 'Tool execution failed' };

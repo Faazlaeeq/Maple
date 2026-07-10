@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ChatRequest, ChatResponse, LeadRecord, ChatMessage } from '../types';
 import { chat as geminiChat } from '../services/gemini';
 import { sendLeadNotification } from '../services/email';
-import { sendVerificationOtp } from '../services/twilio';
+
 import { getClinicProfile, saveLead, updateLeadNotification, saveConversation } from '../services/firestore';
 
 const router = Router();
@@ -41,16 +41,11 @@ router.post('/', async (req: Request, res: Response) => {
       { role: 'assistant', text: geminiResponse.reply, timestamp: now },
     ];
 
-    // ── Save conversation log (async, don't block response) ──
-    saveConversation(sessionId, updatedHistory).catch((err) =>
-      console.error('[Chat] Failed to save conversation:', err)
-    );
-
-    // ── Trigger Verification ──
-    if (geminiResponse.requiresVerification && geminiResponse.emailToVerify) {
-      sendVerificationOtp(geminiResponse.emailToVerify, profile).catch((err) =>
-        console.error('[Chat] Failed to send OTP:', err)
-      );
+    // ── Save conversation log ──
+    try {
+      await saveConversation(sessionId, updatedHistory);
+    } catch (err) {
+      console.error('[Chat] Failed to save conversation:', err);
     }
 
     // ── Handle lead capture ──
@@ -76,14 +71,13 @@ router.post('/', async (req: Request, res: Response) => {
         notificationSent: false,
       };
 
-      // Save lead (don't block response)
-      saveLead(lead)
-        .then(async (leadId) => {
-          // Send email notification immediately after save
-          const emailSent = await sendLeadNotification(lead, profile);
-          await updateLeadNotification(leadId, emailSent);
-        })
-        .catch((err) => console.error('[Chat] Lead processing failed:', err));
+      try {
+        const leadId = await saveLead(lead);
+        const emailSent = await sendLeadNotification(lead, profile);
+        await updateLeadNotification(leadId, emailSent);
+      } catch (err) {
+        console.error('[Chat] Lead processing failed:', err);
+      }
     }
 
     // ── Return response ──
