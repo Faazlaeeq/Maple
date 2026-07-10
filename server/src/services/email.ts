@@ -27,21 +27,8 @@ export async function sendLeadNotification(lead: LeadRecord, profile: ClinicProf
     ? '🔴 URGENT'
     : '🟢 Normal';
 
-  const transcriptHtml = lead.transcript
-    .map(
-      (msg) =>
-        `<div style="margin-bottom:8px;padding:8px 12px;border-radius:8px;${
-          msg.role === 'user'
-            ? 'background:#e3f2fd;text-align:left;'
-            : 'background:#f5f5f5;text-align:left;'
-        }">
-          <strong style="color:${msg.role === 'user' ? '#1565c0' : '#616161'}">${
-          msg.role === 'user' ? '👤 Visitor' : '🤖 Maple'
-        }</strong><br/>
-          ${msg.text}
-        </div>`
-    )
-    .join('');
+  const baseUrl = process.env.PUBLIC_URL || 'http://localhost:3001';
+  const chatViewUrl = `${baseUrl}/api/chat/${lead.id}/view`;
 
   try {
     const { data, error } = await resend.emails.send({
@@ -77,8 +64,11 @@ export async function sendLeadNotification(lead: LeadRecord, profile: ClinicProf
 
             <hr style="border:none;border-top:1px solid #e0e0e0;margin:20px 0;"/>
 
-            <h3 style="color:#334155;margin:0 0 12px;">Conversation Transcript</h3>
-            ${transcriptHtml}
+            <div style="text-align: center; margin-top: 24px;">
+              <a href="${chatViewUrl}" style="display:inline-block;background-color:#1E3A8A;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">
+                View Full Chat Transcript
+              </a>
+            </div>
           </div>
         </div>
       `,

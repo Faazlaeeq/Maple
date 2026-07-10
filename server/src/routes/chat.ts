@@ -9,7 +9,7 @@ import { ChatRequest, ChatResponse, LeadRecord, ChatMessage } from '../types';
 import { chat as geminiChat } from '../services/gemini';
 import { sendLeadNotification } from '../services/email';
 import { sendVerificationOtp } from '../services/twilio';
-import { getClinicProfile, saveLead, updateLeadNotification, saveConversation } from '../services/firestore';
+import { getClinicProfile, saveLead, updateLeadNotification, saveConversation, getLead, getConversation } from '../services/firestore';
 
 const router = Router();
 
@@ -69,25 +69,29 @@ router.post('/', async (req: Request, res: Response) => {
     ) {
       leadCaptured = true;
 
-      const lead: LeadRecord = {
-        id: uuidv4(),
-        clientId: profile.id,
-        visitorName: geminiResponse.visitorName,
-        contactMethod: geminiResponse.contactMethod || 'phone',
-        contactValue: geminiResponse.contactValue,
-        summary: geminiResponse.summary || 'Website inquiry',
-        urgency: geminiResponse.urgency || 'normal',
-        transcript: updatedHistory,
-        createdAt: now,
-        notificationSent: false,
-      };
+      const existingLead = await getLead(sessionId);
+      
+      if (!existingLead) {
+        const lead: LeadRecord = {
+          id: sessionId,
+          clientId: profile.id,
+          visitorName: geminiResponse.visitorName,
+          contactMethod: geminiResponse.contactMethod || 'phone',
+          contactValue: geminiResponse.contactValue,
+          summary: geminiResponse.summary || 'Website inquiry',
+          urgency: geminiResponse.urgency || 'normal',
+          transcript: updatedHistory,
+          createdAt: now,
+          notificationSent: false,
+        };
 
-      try {
-        const leadId = await saveLead(lead);
-        const emailSent = await sendLeadNotification(lead, profile);
-        await updateLeadNotification(leadId, emailSent);
-      } catch (err) {
-        console.error('[Chat] Lead processing failed:', err);
+        try {
+          const leadId = await saveLead(lead);
+          const emailSent = await sendLeadNotification(lead, profile);
+          await updateLeadNotification(leadId, emailSent);
+        } catch (err) {
+          console.error('[Chat] Lead processing failed:', err);
+        }
       }
     }
 
@@ -104,6 +108,69 @@ router.post('/', async (req: Request, res: Response) => {
       reply: "I'm having a little trouble right now — could you leave your name and contact info? Our team will follow up with you right away!",
       leadCaptured: false,
     });
+  }
+});
+
+// ── Read-Only Chat View Route ──
+router.get('/:sessionId/view', async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+    const conversation = await getConversation(sessionId);
+    
+    if (!conversation) {
+      res.status(404).send('Chat not found.');
+      return;
+    }
+    
+    const lead = await getLead(sessionId);
+    const visitorName = lead?.visitorName || 'Visitor';
+
+    const transcriptHtml = conversation.transcript.map((msg: any) => `
+      <div style="margin-bottom: 12px; max-width: 80%; padding: 12px 16px; border-radius: 12px; ${
+        msg.role === 'user' 
+          ? 'background: #e3f2fd; color: #0d47a1; margin-left: auto; border-bottom-right-radius: 4px;' 
+          : 'background: #f1f5f9; color: #334155; margin-right: auto; border-bottom-left-radius: 4px;'
+      }">
+        <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px; opacity: 0.7;">
+          ${msg.role === 'user' ? '👤 ' + visitorName : '🤖 Maple AI'}
+        </div>
+        <div style="line-height: 1.5; font-size: 15px; white-space: pre-wrap;">${msg.text}</div>
+      </div>
+    `).join('');
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Chat Transcript - ${visitorName}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8fafc; margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+          .header { background: #1e293b; color: white; padding: 20px; text-align: center; }
+          .header h1 { margin: 0; font-size: 18px; }
+          .header p { margin: 4px 0 0; font-size: 13px; opacity: 0.8; }
+          .chat-box { padding: 20px; display: flex; flex-direction: column; background: #ffffff; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Conversation with ${visitorName}</h1>
+            <p>Session ID: ${sessionId}</p>
+          </div>
+          <div class="chat-box">
+            ${transcriptHtml}
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    res.send(html);
+  } catch (error) {
+    console.error('[Chat View] Error:', error);
+    res.status(500).send('Internal server error.');
   }
 });
 

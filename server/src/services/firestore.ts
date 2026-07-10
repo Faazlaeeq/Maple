@@ -124,6 +124,31 @@ export async function getLeads(): Promise<LeadRecord[]> {
 }
 
 /**
+ * Get a specific lead by ID.
+ */
+export async function getLead(leadId: string): Promise<LeadRecord | null> {
+  const firestore = getDb();
+
+  if (firestore) {
+    try {
+      const doc = await firestore.collection('leads').doc(leadId).get();
+      if (doc.exists) {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+          createdAt: data?.createdAt?.toDate?.()?.toISOString?.() || data?.createdAt,
+        } as LeadRecord;
+      }
+    } catch (error) {
+      console.error('[Firestore] Failed to get lead:', error);
+    }
+  }
+
+  return inMemoryLeads.find(l => l.id === leadId) || null;
+}
+
+/**
  * Save a conversation log (even non-converting sessions).
  */
 export async function saveConversation(
@@ -146,6 +171,26 @@ export async function saveConversation(
       console.error('[Firestore] Failed to save conversation:', error);
     }
   }
+}
+
+/**
+ * Get a saved conversation log.
+ */
+export async function getConversation(sessionId: string): Promise<{ transcript: { role: string; text: string; timestamp: string }[] } | null> {
+  const firestore = getDb();
+
+  if (firestore) {
+    try {
+      const doc = await firestore.collection('conversations').doc(sessionId).get();
+      if (doc.exists) {
+        return doc.data() as { transcript: { role: string; text: string; timestamp: string }[] };
+      }
+    } catch (error) {
+      console.error('[Firestore] Failed to get conversation:', error);
+    }
+  }
+
+  return null;
 }
 
 // ── OTP Persistence for Serverless ──
