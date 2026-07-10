@@ -11,11 +11,16 @@
       "config": {
         "distDir": "widget/dist"
       }
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/server/src/index.ts" },
-    { "src": "/widget/(.*)", "dest": "/$1" }
+    { "src": "/widget/(.*)", "dest": "/$1" },
+    { "src": "/public/(.*)", "dest": "/public/$1" }
   ],
   "headers": [
     {
