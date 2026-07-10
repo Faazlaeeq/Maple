@@ -1,0 +1,90 @@
+{
+  "businessName": "Smiles R Us",
+  "tagline": "Miami's Premier High-Tech Cosmetic Dentistry",
+  "location": {
+    "address": "1000 Ocean Drive, Suite 5A",
+    "city": "Miami",
+    "state": "FL",
+    "zip": "33139",
+    "neighborhood": "South Beach"
+  },
+  "contact": {
+    "phone": "(305) 555-8822",
+    "email": "booking@smilesrusmiami.com",
+    "website": "https://www.smilesrusmiami.com"
+  },
+  "hours": {
+    "monday": "10:00 AM – 8:00 PM",
+    "tuesday": "10:00 AM – 8:00 PM",
+    "wednesday": "10:00 AM – 8:00 PM",
+    "thursday": "10:00 AM – 8:00 PM",
+    "friday": "10:00 AM – 5:00 PM",
+    "saturday": "10:00 AM – 4:00 PM",
+    "sunday": "11:00 AM – 3:00 PM"
+  },
+  "team": [
+    {
+      "name": "Dr. Alejandro Gomez, DMD",
+      "role": "Founder & Cosmetic Specialist",
+      "bio": "Over 15 years transforming smiles in South Beach. Specializes in ultra-thin porcelain veneers and full mouth reconstruction. Pioneer in 3D digital smile design."
+    },
+    {
+      "name": "Dr. Maria Rossi, DDS",
+      "role": "Orthodontist",
+      "bio": "Platinum Invisalign Provider. Passionate about accelerated orthodontics using Propel technology."
+    }
+  ],
+  "services": [
+    {
+      "name": "Signature Porcelain Veneers",
+      "description": "Custom-designed, ultra-thin porcelain veneers that require minimal prep. Digital preview included before treatment.",
+      "priceRange": "$1,500–$2,500 per tooth"
+    },
+    {
+      "name": "Laser Teeth Whitening",
+      "description": "Advanced EpicX Laser Whitening. Brightens teeth up to 8 shades in just 45 minutes with zero sensitivity.",
+      "priceRange": "$450 per session"
+    },
+    {
+      "name": "Invisalign Platinum",
+      "description": "Comprehensive clear aligner therapy. Includes digital 3D scanning (no messy impressions) and complimentary teeth whitening.",
+      "priceRange": "$4,500–$7,000"
+    },
+    {
+      "name": "Botox & Dermal Fillers",
+      "description": "Complete your smile makeover with facial esthetics. Smooth fine lines and enhance lips.",
+      "priceRange": "$12 per unit (Botox) / $600 per syringe (Fillers)"
+    },
+    {
+      "name": "Routine VIP Cleaning",
+      "description": "Spa-like cleaning experience with noise-canceling headphones, Netflix, and a warm paraffin hand wax.",
+      "priceRange": "$250 flat fee"
+    }
+  ],
+  "insurance": {
+    "accepted": [
+      "Out of Network (Fee for Service)",
+      "CareCredit Financing",
+      "LendingClub"
+    ],
+    "policy": "Smiles R Us is an out-of-network provider for all insurances. We offer premium, uncompromised care and will gladly submit claims on your behalf for out-of-network reimbursement."
+  },
+  "faq": [
+    {
+      "question": "Do you accept my insurance?",
+      "answer": "We are a fee-for-service cosmetic practice and do not contract directly with insurances. However, we can file out-of-network claims for your PPO plan!"
+    },
+    {
+      "question": "How long do veneers take?",
+      "answer": "Thanks to our in-house digital lab, you can get a complete set of custom veneers in just two visits over the course of one week."
+    },
+    {
+      "question": "Do you see children?",
+      "answer": "Our practice focuses strictly on adult cosmetic and restorative dentistry (ages 16+). We would be happy to refer your children to an excellent local pediatric dentist."
+    }
+  ],
+  "policies": {
+    "cancellation": "We require 48 hours notice for cancellations. Late cancellations are subject to a $100 fee.",
+    "payment": "Payment is due in full at the time of service. We offer 0% financing for up to 24 months through CareCredit."
+  }
+}
