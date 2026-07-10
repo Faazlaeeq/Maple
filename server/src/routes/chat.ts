@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ChatRequest, ChatResponse, LeadRecord, ChatMessage } from '../types';
 import { chat as geminiChat } from '../services/gemini';
 import { sendLeadNotification } from '../services/email';
-
+import { sendVerificationOtp } from '../services/twilio';
 import { getClinicProfile, saveLead, updateLeadNotification, saveConversation } from '../services/firestore';
 
 const router = Router();
@@ -46,6 +46,13 @@ router.post('/', async (req: Request, res: Response) => {
       await saveConversation(sessionId, updatedHistory);
     } catch (err) {
       console.error('[Chat] Failed to save conversation:', err);
+    }
+
+    // ── Trigger Verification ──
+    if (geminiResponse.requiresVerification && geminiResponse.emailToVerify) {
+      sendVerificationOtp(geminiResponse.emailToVerify, profile).catch((err) =>
+        console.error('[Chat] Failed to send OTP:', err)
+      );
     }
 
     // ── Handle lead capture ──

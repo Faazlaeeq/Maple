@@ -108,8 +108,21 @@ const cancelAppointmentTool: FunctionDeclaration = {
   },
 };
 
+const verifyOtpTool: FunctionDeclaration = {
+  name: "verify_otp",
+  description: "Check if the 6-digit OTP code provided by the user matches the code sent to their email.",
+  parameters: {
+    type: SchemaType.OBJECT,
+    properties: {
+      email: { type: SchemaType.STRING, description: "The email address the code was sent to" },
+      code: { type: SchemaType.STRING, description: "The 6-digit code the user typed in chat" },
+    },
+    required: ["email", "code"],
+  },
+};
+
 const tools = [{
-  functionDeclarations: [checkAvailabilityTool, bookAppointmentTool, cancelAppointmentTool],
+  functionDeclarations: [checkAvailabilityTool, bookAppointmentTool, cancelAppointmentTool, verifyOtpTool],
 }];
 
 export async function chat(
@@ -170,6 +183,9 @@ export async function chat(
         } else if (call.name === 'cancel_appointment') {
           const success = await cancelAppointment(args.bookingId as string, profile.googleCalendarId);
           apiResponse = { success };
+        } else if (call.name === 'verify_otp') {
+          const success = await checkVerificationOtp(args.email as string, args.code as string);
+          apiResponse = { verified: success };
         }
       } catch (err: any) {
         apiResponse = { error: err.message || 'Tool execution failed' };
