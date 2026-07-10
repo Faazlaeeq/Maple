@@ -180,15 +180,19 @@ export async function chat(
             profile.googleCalendarId
           );
           
-          // Send confirmation email asynchronously
-          sendBookingConfirmation(
-            args.email as string, 
-            args.patientName as string, 
-            args.date as string, 
-            args.time as string, 
-            res.bookingId,
-            profile
-          ).catch(err => console.error('[Email] Async confirmation failed', err));
+          // Send confirmation email synchronously so Vercel doesn't kill it
+          try {
+            await sendBookingConfirmation(
+              args.email as string, 
+              args.patientName as string, 
+              args.date as string, 
+              args.time as string, 
+              res.bookingId,
+              profile
+            );
+          } catch (err) {
+            console.error('[Email] Confirmation failed', err);
+          }
 
           apiResponse = { success: true, bookingId: res.bookingId, eventId: res.eventId };
         } else if (call.name === 'cancel_appointment') {
