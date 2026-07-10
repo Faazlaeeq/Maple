@@ -148,6 +148,35 @@ export async function saveConversation(
   }
 }
 
+// ── OTP Persistence for Serverless ──
+export async function saveOtp(email: string, code: string): Promise<void> {
+  const db = getDb();
+  if (!db) return;
+  try {
+    await db.collection('otps').doc(email).set({
+      code,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (error) {
+    console.error('[Firestore] Failed to save OTP:', error);
+  }
+}
+
+export async function getOtp(email: string): Promise<string | null> {
+  const db = getDb();
+  if (!db) return null;
+  try {
+    const doc = await db.collection('otps').doc(email).get();
+    if (doc.exists) {
+      return doc.data()?.code || null;
+    }
+    return null;
+  } catch (error) {
+    console.error('[Firestore] Failed to get OTP:', error);
+    return null;
+  }
+}
+
 /**
  * Fetch a clinic profile from Firestore or fallback to local files for "maplewood".
  */

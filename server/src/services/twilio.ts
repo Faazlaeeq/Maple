@@ -22,8 +22,7 @@ if (isTwilioConfigured) {
   client = twilio(accountSid, authToken);
 }
 
-// In-memory mock storage for development
-const mockOtpStore = new Map<string, string>();
+import { saveOtp, getOtp } from './firestore';
 
 /**
  * Sends a 6-digit OTP to the specified phone number or email address.
@@ -34,7 +33,7 @@ export async function sendVerificationOtp(contact: string, profile: ClinicProfil
   // If it's an email but no Resend key, or phone but no Twilio client, mock it.
   if ((isEmail && !process.env.RESEND_API_KEY) || (!isEmail && !client)) {
     console.log(`[OTP Mock] Sending OTP to ${contact}. Use code: 123456`);
-    mockOtpStore.set(contact, '123456');
+    await saveOtp(contact, '123456');
     return;
   }
 
@@ -44,7 +43,7 @@ export async function sendVerificationOtp(contact: string, profile: ClinicProfil
   try {
     if (isEmail) {
       await sendOtpEmail(contact, emailCode, profile);
-      mockOtpStore.set(contact, emailCode); // Store for verification
+      await saveOtp(contact, emailCode); // Store for verification across serverless functions
       console.log(`[OTP] Email OTP sent to ${contact}`);
     } else {
       await client!.verify.v2.services(verifyServiceSid!)
@@ -65,12 +64,14 @@ export async function checkVerificationOtp(contact: string, code: string): Promi
   const isEmail = contact.includes('@');
 
   if ((isEmail && !process.env.RESEND_API_KEY) || (!isEmail && !client)) {
-    console.log(`[OTP Mock] Checking OTP for ${contact}. Expected: 123456, Got: ${code}`);
-    return code === mockOtpStore.get(contact);
+    const savedCode = await getOtp(contact);
+    console.log(`[OTP Mock] Checking OTP for ${contact}. Expected: ${savedCode}, Got: ${code}`);
+    return code === savedCode;
   }
 
   if (isEmail) {
-    return code === mockOtpStore.get(contact);
+    const savedCode = await getOtp(contact);
+    return code === savedCode;
   }
 
   try {
