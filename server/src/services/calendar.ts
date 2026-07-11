@@ -52,6 +52,9 @@ export async function getAvailableSlots(dateStr: string, calendarId: string): Pr
     await client.auth.authorize();
 
     const targetDate = parseISO(dateStr);
+    if (isNaN(targetDate.getTime())) {
+      throw new Error(`Invalid date format provided: "${dateStr}". You must provide a valid YYYY-MM-DD date string.`);
+    }
     const timeMin = startOfDay(targetDate).toISOString();
     const timeMax = endOfDay(targetDate).toISOString();
 
@@ -78,9 +81,9 @@ export async function getAvailableSlots(dateStr: string, calendarId: string): Pr
     // Return slots that are NOT booked
     return allSlots.filter(slot => !bookedSlots.includes(slot));
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Calendar] Error fetching availability:', error);
-    throw new Error('Failed to fetch availability.');
+    throw new Error(`Calendar API Error: ${error.message || 'Failed to fetch availability'}`);
   }
 }
 
