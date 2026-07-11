@@ -27,7 +27,7 @@ export async function sendLeadNotification(lead: LeadRecord, profile: ClinicProf
     ? '🔴 URGENT'
     : '🟢 Normal';
 
-  const baseUrl = process.env.PUBLIC_URL || 'http://localhost:3001';
+  const baseUrl = process.env.PUBLIC_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://maple-gray.vercel.app');
   const chatViewUrl = `${baseUrl}/api/chat/${lead.id}/view`;
 
   try {

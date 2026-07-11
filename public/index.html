@@ -1,11 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Smiles R Us Test Page</title>
+  <title>Maple Widget Testing</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    button { padding: 10px 20px; margin-right: 10px; cursor: pointer; }
+  </style>
 </head>
 <body>
-  <h1>Smiles R Us Test Environment</h1>
-  <p>The AI widget in the bottom right is now acting as the Smiles R Us receptionist.</p>
+  <h1>Maple Widget Test Environment</h1>
+  <p>Select which clinic you want to test:</p>
+  <button onclick="window.location.href='?clinic=maplewood'">Maplewood Dental</button>
+  <button onclick="window.location.href='?clinic=smilesrus'">Smiles R Us</button>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const clinicId = urlParams.get('clinic') || 'maplewood';
+    
+    document.write(`<p style="margin-top: 20px;">Currently testing clinic ID: <strong>${clinicId}</strong></p>`);
+
+    const script = document.createElement('script');
+    script.src = "https://maple-gray.vercel.app/widget/maple-widget.js";
+    script.setAttribute('data-clinic-id', clinicId);
+    script.defer = true;
+    document.body.appendChild(script);
+  </script>
 </body>
-<script src="https://maple-gray.vercel.app/widget/maple-widget.js" data-clinic-id="smilesrus" defer></script>
 </html>
