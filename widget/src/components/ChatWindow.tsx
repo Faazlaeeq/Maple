@@ -28,7 +28,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <div className="maple-window__header-info">
           <div className="maple-window__avatar">🍁</div>
           <div>
-            <div className="maple-window__title">Maplewood Dental</div>
+            <div className="maple-window__title">Front Desk Assistant</div>
             <div className="maple-window__status">
               <span className="maple-window__status-dot" />
               Online now

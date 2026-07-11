@@ -8,21 +8,21 @@ import { ChatRequest, ChatResponse } from './types';
 /** Get the API base URL from the script tag's data attribute or default */
 function getWidgetConfig(): { apiUrl: string, clinicId: string } {
   const scripts = document.querySelectorAll('script');
+  let apiUrl = import.meta.env.PROD ? 'https://maple-gray.vercel.app' : 'http://localhost:3001';
+  let clinicId = 'maplewood';
+
   for (const script of scripts) {
-    const url = script.getAttribute('data-maple-api');
-    if (url) {
-      return {
-        apiUrl: url,
-        clinicId: script.getAttribute('data-clinic-id') || 'maplewood'
-      };
+    if (script.src.includes('maple-widget.js') || script.hasAttribute('data-clinic-id')) {
+      const urlAttr = script.getAttribute('data-maple-api');
+      if (urlAttr) apiUrl = urlAttr;
+      
+      const clinicAttr = script.getAttribute('data-clinic-id');
+      if (clinicAttr) clinicId = clinicAttr;
+      break;
     }
   }
 
-  // Fallback for development/production
-  return {
-    apiUrl: import.meta.env.PROD ? 'https://maple-gray.vercel.app' : 'http://localhost:3001',
-    clinicId: 'maplewood'
-  };
+  return { apiUrl, clinicId };
 }
 
 const config = getWidgetConfig();
