@@ -14,10 +14,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled }) 
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus input when component mounts
+  // Auto-focus input when component mounts or becomes re-enabled
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (!disabled) {
+      // Small timeout ensures the DOM has updated before we grab focus
+      setTimeout(() => inputRef.current?.focus(), 10);
+    }
+  }, [disabled]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +39,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled }) 
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Type your message..."
-        disabled={disabled}
+        readOnly={disabled}
         autoComplete="off"
       />
       <button
