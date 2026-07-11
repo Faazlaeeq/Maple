@@ -104,20 +104,20 @@ export async function bookAppointment(dateStr: string, timeStr: string, patientN
 
     // Construct start and end DateTimes (assuming 1-hour appointments)
     // E.g. dateStr: '2026-07-10', timeStr: '14:00'
-    const startDateTime = `${dateStr}T${timeStr}:00-05:00`; // Assuming CDT/CST for Austin, TX
+    const startDateTime = `${dateStr}T${timeStr}:00+05:00`; // PKT Timezone
     const endHour = parseInt(timeStr.split(':')[0]) + 1;
-    const endDateTime = `${dateStr}T${endHour.toString().padStart(2, '0')}:00:00-05:00`;
+    const endDateTime = `${dateStr}T${endHour.toString().padStart(2, '0')}:00:00+05:00`;
 
     const event = {
       summary: `Patient Appointment: ${patientName}`,
       description: `Phone: ${phone}\nBooking ID: ${bookingId}`,
       start: {
         dateTime: startDateTime,
-        timeZone: 'America/Chicago',
+        timeZone: 'Asia/Karachi',
       },
       end: {
         dateTime: endDateTime,
-        timeZone: 'America/Chicago',
+        timeZone: 'Asia/Karachi',
       },
     };
 

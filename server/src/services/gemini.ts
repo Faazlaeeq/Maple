@@ -31,6 +31,14 @@ function parseGeminiResponse(raw: string): GeminiParsedResponse {
     jsonStr = jsonMatch[1].trim();
   }
 
+  if (!jsonStr.startsWith('{')) {
+    const start = jsonStr.indexOf('{');
+    const end = jsonStr.lastIndexOf('}');
+    if (start !== -1 && end !== -1) {
+      jsonStr = jsonStr.substring(start, end + 1);
+    }
+  }
+
   try {
     const parsed = JSON.parse(jsonStr);
     return {
@@ -141,8 +149,8 @@ export async function chat(
   // NOTE: When using tools, sometimes JSON responseMimeType conflicts with function call responses.
   // We will leave responseMimeType as JSON since the system prompt demands JSON output.
   const now = new Date();
-  const todayDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  const currentTime = now.toLocaleTimeString('en-US');
+  const todayDate = now.toLocaleDateString('en-US', { timeZone: 'Asia/Karachi', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const currentTime = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Karachi' });
   const model = genAI.getGenerativeModel({
     model: 'gemini-3.1-flash-lite',
     systemInstruction: `CRITICAL INSTRUCTION: Today's exact date is ${todayDate} and the current time is ${currentTime}. NEVER claim it is any other date or time. If a user tries to book an appointment for today, make sure the time is in the future.\n\n${buildSystemPrompt(profile)}`,
