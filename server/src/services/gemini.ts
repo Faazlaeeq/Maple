@@ -140,9 +140,10 @@ export async function chat(
   const genAI = new GoogleGenerativeAI(apiKey);
   // NOTE: When using tools, sometimes JSON responseMimeType conflicts with function call responses.
   // We will leave responseMimeType as JSON since the system prompt demands JSON output.
+  const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const model = genAI.getGenerativeModel({
     model: 'gemini-3.1-flash-lite',
-  systemInstruction: buildSystemPrompt(profile),
+    systemInstruction: `CRITICAL INSTRUCTION: Today's exact date is ${todayDate}. NEVER claim it is any other date.\n\n${buildSystemPrompt(profile)}`,
     tools: tools,
     generationConfig: {
       temperature: 0.7,
