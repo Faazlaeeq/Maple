@@ -38,7 +38,7 @@ function getCalendarClient(calendarId: string) {
  * For simplicity, we assume office hours are 9 AM to 5 PM, in 1-hour slots.
  * We fetch existing events and remove those slots from our available list.
  */
-export async function getAvailableSlots(dateStr: string, calendarId: string): Promise<string[]> {
+export async function getAvailableSlots(dateStr: string, calendarId: string, timezone: string = 'UTC'): Promise<string[]> {
   const client = getCalendarClient(calendarId);
   
   // Return dummy data if not configured (useful for development)
@@ -64,6 +64,7 @@ export async function getAvailableSlots(dateStr: string, calendarId: string): Pr
       timeMax,
       singleEvents: true,
       orderBy: 'startTime',
+      timeZone: timezone,
     });
 
     const events = response.data.items || [];
@@ -73,9 +74,15 @@ export async function getAvailableSlots(dateStr: string, calendarId: string): Pr
     
     // Find booked slots
     const bookedSlots = events.map(event => {
+      // Use event.start.dateTime which will be returned in the requested timezone
       if (!event.start?.dateTime) return null;
-      // Extract HH:mm
-      return format(parseISO(event.start.dateTime), 'HH:mm');
+      // The string comes back like '2026-07-14T10:00:00-05:00'
+      // We can just extract the HH:mm from the ISO string directly
+      const timePart = event.start.dateTime.split('T')[1];
+      if (timePart) {
+        return timePart.substring(0, 5); // '10:00'
+      }
+      return null;
     }).filter(Boolean) as string[];
 
     // Return slots that are NOT booked
@@ -90,7 +97,7 @@ export async function getAvailableSlots(dateStr: string, calendarId: string): Pr
 /**
  * Creates a calendar event for the booking and returns a Booking ID.
  */
-export async function bookAppointment(dateStr: string, timeStr: string, patientName: string, phone: string, calendarId: string): Promise<{ eventId: string; bookingId: string }> {
+export async function bookAppointment(dateStr: string, timeStr: string, patientName: string, phone: string, calendarId: string, timezone: string = 'UTC'): Promise<{ eventId: string; bookingId: string }> {
   const client = getCalendarClient(calendarId);
   const bookingId = `MFD-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
@@ -102,22 +109,21 @@ export async function bookAppointment(dateStr: string, timeStr: string, patientN
   try {
     await client.auth.authorize();
 
-    // Construct start and end DateTimes (assuming 1-hour appointments)
-    // E.g. dateStr: '2026-07-10', timeStr: '14:00'
-    const startDateTime = `${dateStr}T${timeStr}:00+05:00`; // PKT Timezone
+    // We omit the offset so Google uses the timeZone parameter to interpret the local time
+    const startDateTime = `${dateStr}T${timeStr}:00`; 
     const endHour = parseInt(timeStr.split(':')[0]) + 1;
-    const endDateTime = `${dateStr}T${endHour.toString().padStart(2, '0')}:00:00+05:00`;
+    const endDateTime = `${dateStr}T${endHour.toString().padStart(2, '0')}:00:00`;
 
     const event = {
       summary: `Patient Appointment: ${patientName}`,
       description: `Phone: ${phone}\nBooking ID: ${bookingId}`,
       start: {
         dateTime: startDateTime,
-        timeZone: 'Asia/Karachi',
+        timeZone: timezone,
       },
       end: {
         dateTime: endDateTime,
-        timeZone: 'Asia/Karachi',
+        timeZone: timezone,
       },
     };
 

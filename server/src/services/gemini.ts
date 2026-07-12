@@ -180,7 +180,8 @@ export async function chat(
         const args = call.args as Record<string, any>;
         
         if (call.name === 'check_availability') {
-          const slots = await getAvailableSlots(args.date as string, profile.googleCalendarId);
+          const timezone = (profile as any).timezone || 'UTC';
+          const slots = await getAvailableSlots(args.date as string, profile.googleCalendarId, timezone);
           apiResponse = { availableSlots: slots };
         } else if (call.name === 'book_appointment') {
           // --- AI GUARDRAILS (Programmatic Punishment) ---
@@ -193,7 +194,8 @@ export async function chat(
           }
 
           // Double Booking Prevention
-          const availableSlots = await getAvailableSlots(args.date as string, profile.googleCalendarId);
+          const timezone = (profile as any).timezone || 'UTC';
+          const availableSlots = await getAvailableSlots(args.date as string, profile.googleCalendarId, timezone);
           if (!availableSlots.includes(args.time as string)) {
             throw new Error(`GUARDRAIL FAILED: The time ${args.time} is already booked or unavailable on ${args.date}. Available slots are: ${availableSlots.join(', ')}. Apologize to the user and ask them to pick one of the available slots.`);
           }
@@ -203,7 +205,8 @@ export async function chat(
             args.time as string,
             args.patientName as string,
             args.phone as string,
-            profile.googleCalendarId
+            profile.googleCalendarId,
+            timezone
           );
           
           // Send confirmation email synchronously so Vercel doesn't kill it
