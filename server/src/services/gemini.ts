@@ -183,6 +183,21 @@ export async function chat(
           const slots = await getAvailableSlots(args.date as string, profile.googleCalendarId);
           apiResponse = { availableSlots: slots };
         } else if (call.name === 'book_appointment') {
+          // --- AI GUARDRAILS (Programmatic Punishment) ---
+          const phoneClean = (args.phone || '').replace(/\D/g, '');
+          if (phoneClean.length < 8) {
+            throw new Error("GUARDRAIL FAILED: You did not collect a valid phone number. You MUST ask the user for their real phone number before booking. Do not hallucinate data.");
+          }
+          if (!args.email || !args.email.includes('@')) {
+            throw new Error("GUARDRAIL FAILED: You must verify the user's email address first using OTP before booking.");
+          }
+
+          // Double Booking Prevention
+          const availableSlots = await getAvailableSlots(args.date as string, profile.googleCalendarId);
+          if (!availableSlots.includes(args.time as string)) {
+            throw new Error(`GUARDRAIL FAILED: The time ${args.time} is already booked or unavailable on ${args.date}. Available slots are: ${availableSlots.join(', ')}. Apologize to the user and ask them to pick one of the available slots.`);
+          }
+
           const res = await bookAppointment(
             args.date as string,
             args.time as string,
