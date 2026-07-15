@@ -5,7 +5,7 @@ import { ArrowRight, Calendar, MessageSquare, Phone, ShieldCheck } from 'lucide-
 import Link from 'next/link';
 
 export default function Home() {
-  const springConfig = { type: 'spring', stiffness: 260, damping: 20 };
+  const springConfig = { type: 'spring' as const, stiffness: 260, damping: 20 };
 
   return (
     <div className="min-h-screen border-t-8 border-primary">
