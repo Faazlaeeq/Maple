@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
+import SmoothScroll from "../components/SmoothScroll";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -23,9 +25,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en">
       <body className={`${inter.variable} ${jakarta.variable} font-sans bg-bg text-ink selection:bg-primary selection:text-white`}>
-        {children}
+        <SmoothScroll>
+          {children}
+        </SmoothScroll>
+
+        {/* Maple Chat Widget Integration */}
+        <Script 
+          src="https://maple-gray.vercel.app/widget/maple-widget.js" 
+          strategy="afterInteractive"
+          data-clinic-id="maplewood"
+        />
       </body>
     </html>
   );

@@ -15,12 +15,17 @@
     {
       "src": "public/**",
       "use": "@vercel/static"
+    },
+    {
+      "src": "landing/package.json",
+      "use": "@vercel/next"
     }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/server/src/index.ts" },
     { "src": "/widget/(.*)", "dest": "/$1" },
-    { "src": "/public/(.*)", "dest": "/public/$1" }
+    { "src": "/public/(.*)", "dest": "/public/$1" },
+    { "src": "/(.*)", "dest": "/landing/$1" }
   ],
   "headers": [
     {
