@@ -5,7 +5,8 @@
   "description": "Maple — AI Front Desk Assistant for local service businesses",
   "workspaces": [
     "server",
-    "widget"
+    "widget",
+    "landing"
   ],
   "scripts": {
     "dev:server": "npm run dev --workspace=server",
