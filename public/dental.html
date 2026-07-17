@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maplewood Family Dental | Interactive Practice Overview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --secondary: #E8F5E9;
+            --accent: #1E3A8A;
+            --bg-off-white: #F8FAFC;
+            --text-charcoal: #334155;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-charcoal);
+            background-color: #FFFFFF;
+            scroll-behavior: smooth;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .nav-link.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+<!-- Chosen Palette: Modern Trust (Soft Azure, Mint Green, Deep Navy, Off-White) -->
+
+<!-- Application Structure Plan: 
+    The SPA is structured as a narrative journey designed to build trust through transparency and interactive data. 
+    1. Hero: Immediate value proposition and CTA.
+    2. Practice Insights (Dashboard): Uses quantitative data to visualize 8 years of growth and patient satisfaction, providing instant social proof.
+    3. Services Explorer: An interactive grid that allows users to drill down into specific care types.
+    4. Personal Connection: A dedicated section for Dr. Coleman to humanize the clinical experience.
+    5. Patient Voices: A dynamic marquee of testimonials for atmospheric social proof.
+    6. Action/Booking: A dual-approach contact section highlighting the shift from traditional forms to the modern booking widget.
+    This non-linear structure prioritizes trust-building elements (data and testimonials) early in the user flow to address dental anxiety before presenting service details.
+-->
+
+<!-- Visualization & Content Choices: 
+    - Growth Metrics -> Interactive Line Chart (Chart.js) -> Displays the 8-year journey of patient trust.
+    - Satisfaction Breakdown -> Donut Chart (Chart.js) -> Visualizes positive reviews vs. neutral/other.
+    - Service Categories -> Interactive Reveal Cards -> Facilitates focused exploration without clutter.
+    - Navigation -> Vanilla JS Event Handlers -> Provides smooth page transitions and active state management.
+    - Testimonials -> CSS Marquee -> Creates a sense of continuous community approval.
+    - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visual icons are rendered via Unicode or CSS.
+-->
+
+<!-- Navigation -->
+<nav class="fixed top-0 w-full z-50 glass-card border-b border-gray-100 py-4">
+    <div class="container mx-auto px-6 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-[#4A90E2] rounded-lg flex items-center justify-center text-white font-bold text-xl">&#10010;</div>
+            <span class="text-xl font-bold text-[#1E3A8A]">Maplewood</span>
+        </div>
+        <div class="hidden md:flex space-x-8 text-sm font-medium">
+            <a href="#home" class="nav-link active py-1">Home</a>
+            <a href="#insights" class="nav-link py-1">Practice Insights</a>
+            <a href="#services" class="nav-link py-1">Services</a>
+            <a href="#about" class="nav-link py-1">Dr. Coleman</a>
+            <a href="#contact" class="nav-link py-1">Book Now</a>
+        </div>
+        <button onclick="scrollToSection('contact')" class="bg-[#1E3A8A] text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-800 transition-all">
+            Schedule Visit
+        </button>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section id="home" class="pt-32 pb-20 px-6 bg-[#F8FAFC]">
+    <div class="container mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
+        <div class="space-y-6">
+            <div class="inline-block px-4 py-1 bg-[#E8F5E9] text-[#1E3A8A] rounded-full text-sm font-semibold">
+                Serving Austin for 8 Years
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-[#334155] leading-tight">
+                Modern, Gentle Care for the <span class="text-[#4A90E2]">Whole Family.</span>
+            </h1>
+            <p class="text-lg text-gray-600 leading-relaxed max-w-lg">
+                Welcome to Maplewood Family Dental in Austin, TX. Experience stress-free dentistry with a dedicated team that puts your comfort and oral health first.
+            </p>
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <button onclick="scrollToSection('contact')" class="bg-[#4A90E2] text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-blue-200 hover:scale-105 transition-transform">
+                    Book an Appointment
+                </button>
+                <button onclick="scrollToSection('services')" class="bg-white text-[#1E3A8A] border-2 border-[#1E3A8A] px-8 py-4 rounded-xl font-bold hover:bg-[#F8FAFC] transition-colors">
+                    Explore Services
+                </button>
+            </div>
+        </div>
+        <div class="relative">
+            <div class="absolute -top-10 -left-10 w-40 h-40 bg-[#E8F5E9] rounded-full blur-3xl opacity-50"></div>
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-[#4A90E2] rounded-full blur-3xl opacity-20"></div>
+            <div class="rounded-3xl overflow-hidden shadow-2xl relative z-10 border-8 border-white">
+                <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1000" alt="Modern Dental Office" class="w-full h-[450px] object-cover">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Practice Insights Section -->
+<section id="insights" class="py-20 px-6 bg-white">
+    <div class="container mx-auto max-w-6xl">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold mb-4">Our Practice by the Numbers</h2>
+            <p class="text-gray-500 max-w-2xl mx-auto">
+                Transparency is the foundation of trust. Explore our 8-year journey of providing compassionate dental care to the Austin community through interactive metrics.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+            <div class="bg-[#F8FAFC] p-8 rounded-3xl border border-gray-100 shadow-sm">
+                <h3 class="text-xl font-semibold mb-6 text-center">8 Years of Patient Growth</h3>
+                <div class="chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+                <p class="mt-6 text-sm text-gray-500 italic text-center">
+                    Quantifying 8 years of expansion: Since opening our doors, we've grown from a startup to a trusted Austin staple with a team of 6 experts.
+                </p>
+            </div>
+            <div class="bg-[#F8FAFC] p-8 rounded-3xl border border-gray-100 shadow-sm">
+                <h3 class="text-xl font-semibold mb-6 text-center">Patient Experience Rating</h3>
+                <div class="chart-container">
+                    <canvas id="satisfactionChart"></canvas>
+                </div>
+                <p class="mt-6 text-sm text-gray-500 italic text-center">
+                    Real-world feedback: Our commitment to comfort results in a 96% positive sentiment among local Austin families.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-20 px-6 bg-[#E8F5E9] bg-opacity-30">
+    <div class="container mx-auto max-w-6xl">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div class="max-w-2xl">
+                <h2 class="text-3xl font-bold mb-4 text-[#1E3A8A]">Comprehensive Dental Care</h2>
+                <p class="text-gray-600">
+                    From routine maintenance to advanced cosmetic transformations, our team uses the latest technology to ensure your treatment is effective, painless, and tailored to your needs.
+                </p>
+            </div>
+            <div class="text-[#4A90E2] font-semibold flex items-center space-x-2">
+                <span>Explore Categories</span>
+                <span class="text-2xl">&#8595;</span>
+            </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="servicesGrid">
+            <!-- Dynamic Service Cards Loaded via JS -->
+        </div>
+    </div>
+</section>
+
+<!-- Meet Dr. Coleman -->
+<section id="about" class="py-24 px-6 bg-white overflow-hidden">
+    <div class="container mx-auto max-w-6xl">
+        <div class="grid md:grid-cols-2 gap-16 items-center">
+            <div class="relative">
+                <div class="absolute -top-6 -left-6 w-full h-full border-2 border-[#4A90E2] rounded-3xl translate-x-3 translate-y-3"></div>
+                <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=1000" alt="Dr. Sarah Coleman" class="relative z-10 w-full rounded-3xl shadow-xl h-[500px] object-cover">
+                <div class="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-lg z-20 border border-gray-100">
+                    <div class="text-[#4A90E2] font-bold text-3xl">8+</div>
+                    <div class="text-xs uppercase tracking-widest font-bold text-gray-400">Years in Austin</div>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-[#1E3A8A]">Meet Dr. Sarah Coleman, DDS</h2>
+                <p class="text-lg text-gray-600 leading-relaxed italic">
+                    "I founded Maplewood 8 years ago because I wanted to change the way people feel about the dentist. We've built a sanctuary for health, not just a clinic."
+                </p>
+                <div class="space-y-4 text-gray-600">
+                    <p>A graduate of the UT School of Dentistry, Dr. Coleman specializes in patient-centric care that prioritizes long-term outcomes over short-term fixes.</p>
+                    <p>When she's not helping patients, she's likely hiking Barton Creek with her golden retriever, Max, or enjoying the vibrant Austin local scene.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-4">
+                    <div class="flex items-center space-x-3 p-3 rounded-xl bg-[#F8FAFC] border border-gray-100">
+                        <span class="text-2xl">&#127891;</span>
+                        <div>
+                            <p class="text-xs font-bold uppercase text-gray-400 tracking-wider">Education</p>
+                            <p class="text-sm font-semibold">DDS, UT Austin</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 p-3 rounded-xl bg-[#F8FAFC] border border-gray-100">
+                        <span class="text-2xl">&#9881;</span>
+                        <div>
+                            <p class="text-xs font-bold uppercase text-gray-400 tracking-wider">Affiliation</p>
+                            <p class="text-sm font-semibold">ADA Member</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Marquee -->
+<div class="bg-[#1E3A8A] py-12">
+    <div class="marquee-container">
+        <div class="marquee-content flex items-center space-x-12" id="marquee">
+            <!-- Content will be duplicated for seamless scroll -->
+        </div>
+    </div>
+</div>
+
+<!-- Contact & Booking Section -->
+<section id="contact" class="py-20 px-6 bg-[#F8FAFC]">
+    <div class="container mx-auto max-w-6xl">
+        <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-gray-100 grid md:grid-cols-5">
+            <div class="md:col-span-2 bg-[#1E3A8A] p-10 text-white flex flex-col justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6">Let's Get You Scheduled</h2>
+                    <p class="text-blue-100 mb-8 leading-relaxed">
+                        Whether it is a routine cleaning or a specific dental concern, we're ready to provide the care you deserve. Reach out or visit us in South Austin.
+                    </p>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl">&#128205;</span>
+                            <div>
+                                <p class="font-bold text-sm uppercase text-blue-300">Location</p>
+                                <p>123 Maplewood Drive, Austin, TX 78704</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl">&#128222;</span>
+                            <div>
+                                <p class="font-bold text-sm uppercase text-blue-300">Phone</p>
+                                <p>(512) 555-0198</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl">&#9200;</span>
+                            <div>
+                                <p class="font-bold text-sm uppercase text-blue-300">Hours</p>
+                                <p>Mon - Fri: 8AM - 5PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-12 p-4 bg-[#4A90E2] rounded-xl text-center">
+                    <p class="text-xs font-bold uppercase mb-1">Response Time</p>
+                    <p class="text-sm font-semibold">Usually within 2 hours</p>
+                </div>
+            </div>
+            <div class="md:col-span-3 p-10">
+                <form id="contactForm" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-gray-500 uppercase">Full Name</label>
+                            <input type="text" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A90E2] focus:border-transparent outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-gray-500 uppercase">Phone Number</label>
+                            <input type="tel" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A90E2] focus:border-transparent outline-none transition-all">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-500 uppercase">Email Address</label>
+                        <input type="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A90E2] focus:border-transparent outline-none transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-500 uppercase">Preferred Service</label>
+                        <select class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A90E2] focus:border-transparent outline-none transition-all bg-white">
+                            <option>General Dentistry</option>
+                            <option>Cosmetic Dentistry</option>
+                            <option>Teeth Whitening</option>
+                            <option>Dental Implants</option>
+                            <option>Emergency Care</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-500 uppercase">Message/Notes</label>
+                        <textarea rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A90E2] focus:border-transparent outline-none transition-all"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-[#1E3A8A] text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100">
+                        Request Appointment
+                    </button>
+                    <p class="text-center text-xs text-gray-400 pt-2">By submitting, you agree to our privacy policy and terms of service.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-12 px-6 border-t border-gray-100">
+    <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-8">
+        <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 bg-[#4A90E2] rounded-md flex items-center justify-center text-white font-bold text-sm">&#10010;</div>
+            <span class="text-lg font-bold text-[#1E3A8A]">Maplewood Family Dental</span>
+        </div>
+        <div class="flex space-x-6 text-sm text-gray-500 font-medium">
+            <a href="#" class="hover:text-[#4A90E2]">Privacy</a>
+            <a href="#" class="hover:text-[#4A90E2]">Terms</a>
+            <a href="#" class="hover:text-[#4A90E2]">Accessibility</a>
+        </div>
+        <div class="text-sm text-gray-400">
+            &copy; 2024 Maplewood Family Dental. Proudly serving Austin, TX.
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Data Storage
+    const services = [
+        { title: "General Dentistry", description: "Comprehensive exams, cleanings, and preventative care to keep your natural smile healthy and strong for life.", icon: "&#129447;" },
+        { title: "Cosmetic Dentistry", description: "Achieve the aesthetic you've always wanted with veneers, bonding, and total smile reconstructions.", icon: "&#10024;" },
+        { title: "Teeth Whitening", description: "Our professional treatments brighten your smile by several shades in a single visit with zero sensitivity.", icon: "&#128142;" },
+        { title: "Dental Implants", description: "Permanent, natural-feeling solutions for missing teeth that restore full bite function and confidence.", icon: "&#128205;" },
+        { title: "Emergency Care", description: "Pain can't wait. We offer same-day emergency visits to address trauma, infections, or sudden discomfort.", icon: "&#128657;" },
+        { title: "Pediatric Care", description: "A gentle introduction to oral health for our youngest patients, building a foundation for a lifetime of health.", icon: "&#127804;" }
+    ];
+
+    const testimonials = [
+        "Michael T.: 'Dr. Coleman instantly put my dental anxiety at ease. The clinic is beautiful and modern.'",
+        "Elena R.: 'The best family dentist in Austin. They are incredible with my two toddlers!'",
+        "David L.: 'Incredible whitening results before my wedding. The staff treated me like family.'",
+        "Sarah K.: 'Honest, painless, and zero upselling. Exactly what I want in a healthcare provider.'",
+        "Michael T.: 'Dr. Coleman instantly put my dental anxiety at ease. The clinic is beautiful and modern.'",
+        "Elena R.: 'The best family dentist in Austin. They are incredible with my two toddlers!'"
+    ];
+
+    // Initialize Charts
+    function initCharts() {
+        // Growth Chart
+        const growthCtx = document.getElementById('growthChart').getContext('2d');
+        new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'],
+                datasets: [{
+                    label: 'Patient Count Index',
+                    data: [10, 25, 45, 70, 85, 120, 155, 190],
+                    borderColor: '#4A90E2',
+                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#1E3A8A'
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { color: '#94a3b8' },
+                        grid: { borderDash: [5, 5] }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Satisfaction Chart
+        const satCtx = document.getElementById('satisfactionChart').getContext('2d');
+        new Chart(satCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Satisfied', 'Neutral', 'New Clients'],
+                datasets: [{
+                    data: [85, 10, 5],
+                    backgroundColor: ['#4A90E2', '#E8F5E9', '#1E3A8A'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: { size: 12 }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+
+    // Load Dynamic Content
+    function loadContent() {
+        // Load Services
+        const servicesGrid = document.getElementById('servicesGrid');
+        services.forEach(service => {
+            const card = document.createElement('div');
+            card.className = "bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all group";
+            card.innerHTML = `
+                <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform">${service.icon}</div>
+                <h3 class="text-lg font-bold text-[#334155] mb-2">${service.title}</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">${service.description}</p>
+            `;
+            servicesGrid.appendChild(card);
+        });
+
+        // Load Marquee
+        const marquee = document.getElementById('marquee');
+        testimonials.forEach(text => {
+            const div = document.createElement('div');
+            div.className = "text-white text-lg font-medium opacity-80 italic flex items-center";
+            div.innerHTML = `<span class="text-3xl mr-2 text-[#4A90E2]">&#10077;</span> ${text} <span class="ml-12 text-[#4A90E2]">&#9670;</span>`;
+            marquee.appendChild(div);
+        });
+    }
+
+    // Navigation and Scrolling
+    function scrollToSection(id) {
+        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 150) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    // Form Handling
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button');
+        const originalText = btn.innerText;
+        btn.innerText = "Requesting...";
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            alert('Thank you for reaching out! Dr. Coleman’s team will contact you within 2 business hours.');
+            btn.innerText = originalText;
+            btn.disabled = false;
+            this.reset();
+        }, 1500);
+    });
+
+    // Initialize
+    window.onload = () => {
+        initCharts();
+        loadContent();
+    };
+</script>
+
+<!-- Maple Chat Widget Integration -->
+<script 
+  src="https://maple-gray.vercel.app/widget/maple-widget.js" 
+  data-clinic-id="maplewood"
+  defer>
+</script>
+
+</body>
+</html>
