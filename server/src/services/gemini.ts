@@ -152,7 +152,7 @@ export async function chat(
   const todayDate = now.toLocaleDateString('en-US', { timeZone: 'Asia/Karachi', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const currentTime = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Karachi' });
   const model = genAI.getGenerativeModel({
-    model: 'gemini-3.1-flash-lite',
+    model: 'gemini-1.5-flash',
     systemInstruction: `CRITICAL INSTRUCTION: Today's exact date is ${todayDate} and the current time is ${currentTime}. NEVER claim it is any other date or time. If a user tries to book an appointment for today, make sure the time is in the future.\n\n${buildSystemPrompt(profile)}`,
     tools: tools,
     generationConfig: {

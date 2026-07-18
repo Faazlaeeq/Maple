@@ -222,17 +222,24 @@ export async function getOtp(email: string): Promise<string | null> {
   }
 }
 
+// ── Simple In-Memory Cache for Clinic Profiles ──
+const profileCache: Record<string, ClinicProfile> = {};
+
 /**
  * Fetch a clinic profile from Firestore or fallback to local files for "maplewood".
  */
 export async function getClinicProfile(clinicId: string): Promise<ClinicProfile | null> {
+  if (profileCache[clinicId]) return profileCache[clinicId];
+
   const firestore = getDb();
   
   if (firestore) {
     try {
       const doc = await firestore.collection('clinics').doc(clinicId).get();
       if (doc.exists) {
-        return { id: doc.id, ...doc.data() } as ClinicProfile;
+        const profile = { id: doc.id, ...doc.data() } as ClinicProfile;
+        profileCache[clinicId] = profile;
+        return profile;
       }
     } catch (error) {
       console.error('[Firestore] Failed to fetch clinic profile:', error);

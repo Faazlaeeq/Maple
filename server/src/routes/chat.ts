@@ -53,11 +53,9 @@ router.post('/', async (req: Request, res: Response) => {
     ];
 
     // ── Save conversation log ──
-    try {
-      await saveConversation(sessionId, updatedHistory);
-    } catch (err) {
+    saveConversation(sessionId, updatedHistory).catch((err) => {
       console.error('[Chat] Failed to save conversation:', err);
-    }
+    });
 
     // ── Handle lead capture ──
     let leadCaptured = false;
