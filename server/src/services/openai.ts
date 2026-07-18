@@ -112,7 +112,7 @@ export async function chat(
 
   try {
     let response = await openai.chat.completions.create({
-      model: 'gpt-5.4-mini',
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
       messages,
       tools,
       temperature: 0.7,
@@ -181,7 +181,7 @@ export async function chat(
       }
 
       response = await openai.chat.completions.create({
-        model: 'gpt-5.4-mini',
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
         messages,
         tools,
         temperature: 0.7,
