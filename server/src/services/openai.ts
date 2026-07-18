@@ -98,7 +98,13 @@ export async function chat(
   const currentTime = now.toLocaleTimeString('en-US', { timeZone: 'America/Chicago' });
 
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: `CRITICAL INSTRUCTION: Today's exact date is ${todayDate} and the current time is ${currentTime}. NEVER claim it is any other date or time. If a user tries to book an appointment for today, make sure the time is in the future. MUST return valid JSON.\n\n${buildSystemPrompt(profile)}` }
+    { role: "system", content: `CRITICAL INSTRUCTION: Today's exact date is ${todayDate} and the current time is ${currentTime}. NEVER claim it is any other date or time. If a user tries to book an appointment for today, make sure the time is in the future. MUST return valid JSON.
+
+LANGUAGE & CONTEXT GUARDRAILS:
+1. Memory: If the user has already provided their name, email, or phone number earlier in the chat, DO NOT ask for them again. Read the chat history carefully before asking for details.
+2. Roman Urdu/Hindi: If the user speaks in Roman Urdu or Roman Hindi (e.g., "kahan say la raha", "abay bawlay"), you must reply in English or Roman Urdu. NEVER output Arabic/Urdu script (like میں). Maintain your professional persona but adapt to their language script.
+
+${buildSystemPrompt(profile)}` }
   ];
 
   for (const msg of history) {
