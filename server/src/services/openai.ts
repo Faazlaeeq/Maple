@@ -129,6 +129,7 @@ export async function chat(
       messages.push(messageObj);
 
       for (const call of calls) {
+        if (call.type !== 'function') continue;
         let apiResponse: any = {};
         try {
           const args = JSON.parse(call.function.arguments);
