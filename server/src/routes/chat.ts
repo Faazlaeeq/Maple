@@ -6,7 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatRequest, ChatResponse, LeadRecord, ChatMessage } from '../types';
-import { chat as openaiChat } from '../services/openai';
+import { chat as geminiChat } from '../services/gemini';
 import { sendLeadNotification } from '../services/email';
 import { sendVerificationOtp } from '../services/twilio';
 import { getClinicProfile, saveLead, updateLeadNotification, saveConversation, getLead, getConversation } from '../services/firestore';
@@ -31,7 +31,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // ── Call Gemini ──
-    const geminiResponse = await openaiChat(message, history || [], profile);
+    const geminiResponse = await geminiChat(message, history || [], profile);
 
     // ── Trigger Verification ──
     if (geminiResponse.requiresVerification && geminiResponse.emailToVerify) {
