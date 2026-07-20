@@ -182,3 +182,206 @@ export async function sendBookingConfirmation(email: string, patientName: string
     return false;
   }
 }
+
+/**
+ * Send a booking notification email to the clinic owner/dentist.
+ */
+export async function sendBookingNotificationToClinic(
+  patientName: string,
+  email: string,
+  phone: string,
+  date: string,
+  time: string,
+  bookingId: string,
+  profile: ClinicProfile
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const notificationEmail = profile.notificationEmail;
+
+  if (!apiKey || !notificationEmail) {
+    console.warn('[Email] Resend not configured — skipping booking notification to clinic');
+    return false;
+  }
+
+  const resend = new Resend(apiKey);
+  try {
+    const { error } = await resend.emails.send({
+      from: `${profile.name} Assistant <assistant@orbitmatrix.org>`,
+      to: notificationEmail,
+      subject: `🟢 New Booking: ${patientName} — ${date} at ${time}`,
+      html: `
+        <div style="font-family:'Inter',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <div style="background:linear-gradient(135deg,#22c55e,#15803d);color:white;padding:24px;border-radius:12px 12px 0 0;">
+            <h1 style="margin:0;font-size:20px;">🍁 ${profile.name} — New Appointment Booked</h1>
+            <p style="margin:8px 0 0;opacity:0.9;font-size:14px;">${new Date().toLocaleString()}</p>
+          </div>
+          
+          <div style="border:1px solid #e0e0e0;border-top:none;padding:24px;border-radius:0 0 12px 12px;">
+            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;width:120px;">Patient</td>
+                <td style="padding:8px 0;">${patientName}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;">Email</td>
+                <td style="padding:8px 0;">📧 ${email}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;">Phone</td>
+                <td style="padding:8px 0;">📱 ${phone}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;">Date</td>
+                <td style="padding:8px 0;">${date}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;">Time</td>
+                <td style="padding:8px 0;">${time}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;">Booking ID</td>
+                <td style="padding:8px 0;">${bookingId}</td>
+              </tr>
+            </table>
+            <p style="color:#15803d;font-size:13px;margin-top:16px;">This appointment was booked via the Maple AI assistant.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('[Email] Resend error for booking notification to clinic:', error);
+      return false;
+    }
+    console.log(`[Email] Booking notification sent to clinic: ${notificationEmail}`);
+    return true;
+  } catch (error) {
+    console.error('[Email] Failed to send booking notification to clinic:', error);
+    return false;
+  }
+}
+
+/**
+ * Send a cancellation confirmation email to the patient.
+ */
+export async function sendCancellationToPatient(
+  email: string,
+  patientName: string,
+  date: string,
+  time: string,
+  bookingId: string,
+  profile: ClinicProfile
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('[Email] Resend not configured — skipping cancellation email to patient');
+    return false;
+  }
+
+  const resend = new Resend(apiKey);
+  try {
+    const { error } = await resend.emails.send({
+      from: `${profile.name} Assistant <assistant@orbitmatrix.org>`,
+      to: email,
+      subject: `Appointment Cancelled: ${profile.name}`,
+      html: `
+        <div style="font-family:'Inter',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <div style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
+            <h1 style="margin:0;font-size:20px;">🍁 ${profile.name}</h1>
+          </div>
+          <div style="border:1px solid #e0e0e0;border-top:none;padding:24px;border-radius:0 0 12px 12px;">
+            <h2 style="color:#334155;margin:0 0 16px;">Hi ${patientName},</h2>
+            <p style="color:#616161;font-size:15px;line-height:1.6;">Your appointment has been <strong style="color:#ef4444;">cancelled</strong>. Here were the details:</p>
+            
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin:20px 0;">
+              <p style="margin:0 0 8px;font-size:14px;"><strong style="color:#991b1b;">Date:</strong> ${date}</p>
+              <p style="margin:0 0 8px;font-size:14px;"><strong style="color:#991b1b;">Time:</strong> ${time}</p>
+              <p style="margin:0;font-size:14px;"><strong style="color:#991b1b;">Booking ID:</strong> ${bookingId}</p>
+            </div>
+            
+            <p style="color:#616161;font-size:14px;line-height:1.6;">If you'd like to rebook, visit our website and chat with our assistant anytime.</p>
+            <p style="color:#616161;font-size:14px;margin-top:24px;">We hope to see you soon!</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('[Email] Resend error for cancellation to patient:', error);
+      return false;
+    }
+    console.log(`[Email] Cancellation email sent to patient: ${email}`);
+    return true;
+  } catch (error) {
+    console.error('[Email] Failed to send cancellation to patient:', error);
+    return false;
+  }
+}
+
+/**
+ * Send a cancellation notification email to the clinic owner/dentist.
+ */
+export async function sendCancellationToClinic(
+  patientName: string,
+  date: string,
+  time: string,
+  bookingId: string,
+  profile: ClinicProfile
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const notificationEmail = profile.notificationEmail;
+
+  if (!apiKey || !notificationEmail) {
+    console.warn('[Email] Resend not configured — skipping cancellation notification to clinic');
+    return false;
+  }
+
+  const resend = new Resend(apiKey);
+  try {
+    const { error } = await resend.emails.send({
+      from: `${profile.name} Assistant <assistant@orbitmatrix.org>`,
+      to: notificationEmail,
+      subject: `🔴 Appointment Cancelled: ${patientName} — ${bookingId}`,
+      html: `
+        <div style="font-family:'Inter',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <div style="background:linear-gradient(135deg,#ef4444,#991b1b);color:white;padding:24px;border-radius:12px 12px 0 0;">
+            <h1 style="margin:0;font-size:20px;">🍁 ${profile.name} — Appointment Cancelled</h1>
+            <p style="margin:8px 0 0;opacity:0.9;font-size:14px;">${new Date().toLocaleString()}</p>
+          </div>
+          
+          <div style="border:1px solid #e0e0e0;border-top:none;padding:24px;border-radius:0 0 12px 12px;">
+            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;width:120px;">Patient</td>
+                <td style="padding:8px 0;">${patientName}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;">Date</td>
+                <td style="padding:8px 0;">${date}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;">Time</td>
+                <td style="padding:8px 0;">${time}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-weight:bold;color:#334155;">Booking ID</td>
+                <td style="padding:8px 0;">${bookingId}</td>
+              </tr>
+            </table>
+            <p style="color:#ef4444;font-size:13px;margin-top:16px;">This appointment has been cancelled by the patient via the AI assistant.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('[Email] Resend error for cancellation to clinic:', error);
+      return false;
+    }
+    console.log(`[Email] Cancellation notification sent to clinic: ${notificationEmail}`);
+    return true;
+  } catch (error) {
+    console.error('[Email] Failed to send cancellation to clinic:', error);
+    return false;
+  }
+}

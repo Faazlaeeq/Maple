@@ -9,7 +9,7 @@ import path from 'path';
 import { ChatMessage, GeminiParsedResponse, ClinicProfile } from '../types';
 import { getAvailableSlots, bookAppointment, cancelAppointment } from './calendar';
 import { checkVerificationOtp } from './twilio';
-import { sendBookingConfirmation } from './email';
+import { sendBookingConfirmation, sendBookingNotificationToClinic, sendCancellationToPatient, sendCancellationToClinic } from './email';
 
 function buildSystemPrompt(profile: ClinicProfile): string {
   return profile.systemPrompt
@@ -144,7 +144,7 @@ const bookAppointmentTool: FunctionDeclaration = {
 
 const cancelAppointmentTool: FunctionDeclaration = {
   name: "cancel_appointment",
-  description: "Cancel an existing appointment using the booking ID provided by the user.",
+  description: "Cancel an existing appointment using the booking ID provided by the user. You MUST also collect the patient's email before cancelling so we can send them a confirmation.",
   parameters: {
     type: SchemaType.OBJECT,
     properties: {
@@ -152,8 +152,12 @@ const cancelAppointmentTool: FunctionDeclaration = {
         type: SchemaType.STRING,
         description: "The unique booking ID (e.g. MFD-8A9B2)",
       },
+      email: {
+        type: SchemaType.STRING,
+        description: "The patient's email address to send cancellation confirmation to",
+      },
     },
-    required: ["bookingId"],
+    required: ["bookingId", "email"],
   },
 };
 
@@ -265,9 +269,40 @@ export async function chat(
           }
 
           apiResponse = { success: true, bookingId: res.bookingId, eventId: res.eventId };
+
+          // Notify the clinic about the new booking (non-blocking)
+          sendBookingNotificationToClinic(
+            args.patientName as string,
+            args.email as string,
+            args.phone as string,
+            args.date as string,
+            args.time as string,
+            res.bookingId,
+            profile
+          ).catch(err => console.error('[Email] Booking notification to clinic failed:', err));
         } else if (call.name === 'cancel_appointment') {
-          const success = await cancelAppointment(args.bookingId as string, profile.googleCalendarId);
-          apiResponse = { success };
+          const cancelResult = await cancelAppointment(args.bookingId as string, profile.googleCalendarId);
+          apiResponse = { success: true, bookingId: cancelResult.bookingId };
+
+          // Send cancellation emails (non-blocking)
+          const patientEmail = args.email as string;
+          if (patientEmail) {
+            sendCancellationToPatient(
+              patientEmail,
+              cancelResult.patientName,
+              cancelResult.date,
+              cancelResult.time,
+              cancelResult.bookingId,
+              profile
+            ).catch(err => console.error('[Email] Cancellation to patient failed:', err));
+          }
+          sendCancellationToClinic(
+            cancelResult.patientName,
+            cancelResult.date,
+            cancelResult.time,
+            cancelResult.bookingId,
+            profile
+          ).catch(err => console.error('[Email] Cancellation to clinic failed:', err));
         } else if (call.name === 'verify_otp') {
           const success = await checkVerificationOtp(args.email as string, args.code as string);
           apiResponse = { verified: success };

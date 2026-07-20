@@ -144,16 +144,27 @@ export async function bookAppointment(dateStr: string, timeStr: string, patientN
 }
 
 /**
+ * Details returned after a successful cancellation.
+ */
+export interface CancelledEventDetails {
+  bookingId: string;
+  patientName: string;
+  phone: string;
+  date: string;   // e.g. "2026-07-22"
+  time: string;    // e.g. "14:00"
+}
+
+/**
  * Cancels an appointment given the human-readable Booking ID (e.g. MFD-UJWJW).
  * Searches calendar events to find the one whose description contains the booking ID,
- * then deletes that event.
+ * then deletes that event. Returns event details for notification emails.
  */
-export async function cancelAppointment(bookingId: string, calendarId: string): Promise<boolean> {
+export async function cancelAppointment(bookingId: string, calendarId: string): Promise<CancelledEventDetails> {
   const client = getCalendarClient(calendarId);
 
   if (!client) {
     console.log(`[Calendar Mock] Canceled booking: ${bookingId}`);
-    return true;
+    return { bookingId, patientName: 'Patient', phone: '', date: 'N/A', time: 'N/A' };
   }
 
   try {
@@ -183,6 +194,16 @@ export async function cancelAppointment(bookingId: string, calendarId: string): 
       throw new Error(`No appointment found with Booking ID: ${bookingId}. Please double-check the ID and try again.`);
     }
 
+    // Extract details from the event before deleting
+    const summary = matchingEvent.summary || '';
+    const description = matchingEvent.description || '';
+    const patientName = summary.replace('Patient Appointment: ', '').trim() || 'Patient';
+    const phoneMatch = description.match(/Phone:\s*(.+)/);
+    const phone = phoneMatch ? phoneMatch[1].trim() : '';
+    const startDt = matchingEvent.start?.dateTime || matchingEvent.start?.date || '';
+    const eventDate = startDt ? startDt.substring(0, 10) : 'N/A';
+    const eventTime = startDt && startDt.includes('T') ? startDt.substring(11, 16) : 'N/A';
+
     // Delete the actual Google Calendar event
     await client.calendar.events.delete({
       calendarId: client.calendarId,
@@ -190,7 +211,7 @@ export async function cancelAppointment(bookingId: string, calendarId: string): 
     });
 
     console.log(`[Calendar] Successfully canceled booking ${bookingId} (event: ${matchingEvent.id})`);
-    return true;
+    return { bookingId, patientName, phone, date: eventDate, time: eventTime };
   } catch (error: any) {
     console.error(`[Calendar] Error canceling booking ${bookingId}:`, error);
     throw new Error(error.message || `Failed to cancel booking ${bookingId}.`);
