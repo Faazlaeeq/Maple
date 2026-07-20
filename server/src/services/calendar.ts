@@ -144,26 +144,55 @@ export async function bookAppointment(dateStr: string, timeStr: string, patientN
 }
 
 /**
- * Cancels an appointment given the Google Calendar Event ID.
+ * Cancels an appointment given the human-readable Booking ID (e.g. MFD-UJWJW).
+ * Searches calendar events to find the one whose description contains the booking ID,
+ * then deletes that event.
  */
-export async function cancelAppointment(eventId: string, calendarId: string): Promise<boolean> {
+export async function cancelAppointment(bookingId: string, calendarId: string): Promise<boolean> {
   const client = getCalendarClient(calendarId);
 
   if (!client) {
-    console.log(`[Calendar Mock] Canceled event: ${eventId}`);
+    console.log(`[Calendar Mock] Canceled booking: ${bookingId}`);
     return true;
   }
 
   try {
     await client.auth.authorize();
 
+    // Search events in the next 90 days for one matching this booking ID
+    const now = new Date();
+    const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
+    const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days ahead
+
+    const response = await client.calendar.events.list({
+      calendarId: client.calendarId,
+      timeMin,
+      timeMax,
+      singleEvents: true,
+      q: bookingId, // Search query — looks in summary + description
+    });
+
+    const events = response.data.items || [];
+    const matchingEvent = events.find(
+      (event: any) =>
+        (event.description && event.description.includes(bookingId)) ||
+        (event.summary && event.summary.includes(bookingId))
+    );
+
+    if (!matchingEvent || !matchingEvent.id) {
+      throw new Error(`No appointment found with Booking ID: ${bookingId}. Please double-check the ID and try again.`);
+    }
+
+    // Delete the actual Google Calendar event
     await client.calendar.events.delete({
       calendarId: client.calendarId,
-      eventId,
+      eventId: matchingEvent.id,
     });
+
+    console.log(`[Calendar] Successfully canceled booking ${bookingId} (event: ${matchingEvent.id})`);
     return true;
-  } catch (error) {
-    console.error(`[Calendar] Error canceling event ${eventId}:`, error);
-    return false;
+  } catch (error: any) {
+    console.error(`[Calendar] Error canceling booking ${bookingId}:`, error);
+    throw new Error(error.message || `Failed to cancel booking ${bookingId}.`);
   }
 }
