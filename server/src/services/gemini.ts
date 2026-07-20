@@ -26,11 +26,14 @@ function formatHistory(history: ChatMessage[]): Array<{ role: string; parts: Arr
 
 function parseGeminiResponse(raw: string): GeminiParsedResponse {
   let jsonStr = raw.trim();
+
+  // Step 1: Try to extract JSON from markdown code fences
   const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (jsonMatch) {
     jsonStr = jsonMatch[1].trim();
   }
 
+  // Step 2: Try to find a JSON object in the text
   if (!jsonStr.startsWith('{')) {
     const start = jsonStr.indexOf('{');
     const end = jsonStr.lastIndexOf('}');
@@ -39,6 +42,7 @@ function parseGeminiResponse(raw: string): GeminiParsedResponse {
     }
   }
 
+  // Step 3: Attempt JSON parse
   try {
     const parsed = JSON.parse(jsonStr);
     return {
@@ -54,12 +58,46 @@ function parseGeminiResponse(raw: string): GeminiParsedResponse {
       errorAlert: parsed.errorAlert || undefined,
     };
   } catch {
-    console.warn('[Gemini] Failed to parse JSON response, using raw text');
+    // JSON parse failed — extract structured data from raw text using heuristics
+    console.warn('[Gemini] Failed to parse JSON response, extracting from raw text');
+
+    const lowerRaw = raw.toLowerCase();
+
+    // Detect email addresses in the raw text
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    const emailsFound = raw.match(emailRegex) || [];
+
+    // Detect verification intent (AI claims it sent an OTP)
+    const verificationKeywords = [
+      'verification code', 'verify your', 'sent a', 'sent you a',
+      'otp', '6-digit', 'code to your email', 'check your inbox',
+      'check your email', 'verification email'
+    ];
+    const hasVerificationIntent = verificationKeywords.some(kw => lowerRaw.includes(kw));
+
+    // Detect urgency
+    const urgencyKeywords = [
+      'emergency', 'pain', 'severe', 'broken', 'infection',
+      'swelling', 'bleeding', 'abscess', 'knocked out', 'urgent'
+    ];
+    const isUrgent = urgencyKeywords.some(kw => lowerRaw.includes(kw));
+
+    // Detect lead capture (the AI is asking for or confirming contact details)
+    const leadKeywords = ['your name', 'your email', 'your phone', 'contact'];
+    const hasLeadIntent = leadKeywords.some(kw => lowerRaw.includes(kw));
+
+    // Determine if we should trigger verification
+    const shouldVerify = hasVerificationIntent && emailsFound.length > 0;
+
     return {
       reply: raw,
-      leadDetected: false,
-      urgency: 'normal',
-      requiresVerification: false,
+      leadDetected: hasLeadIntent && emailsFound.length > 0,
+      contactMethod: emailsFound.length > 0 ? 'email' : undefined,
+      contactValue: emailsFound[0] || undefined,
+      urgency: isUrgent ? 'urgent' : 'normal',
+      requiresVerification: shouldVerify,
+      emailToVerify: shouldVerify ? emailsFound[0] : undefined,
+      errorAlert: undefined,
     };
   }
 }
@@ -69,6 +107,7 @@ const FALLBACK_MESSAGE: GeminiParsedResponse = {
   leadDetected: false,
   urgency: 'normal',
   requiresVerification: false,
+  errorAlert: 'Our AI assistant encountered an issue processing your message. Please try again.',
 };
 
 // Define Tools
@@ -252,7 +291,10 @@ export async function chat(
     const responseText = result.response.text();
     if (!responseText) {
       console.warn('[Gemini] Empty response received');
-      return FALLBACK_MESSAGE;
+      return {
+        ...FALLBACK_MESSAGE,
+        errorAlert: 'AI returned an empty response. This may be a temporary issue — please try again.',
+      };
     }
 
     const parsedResponse = parseGeminiResponse(responseText);
@@ -260,8 +302,11 @@ export async function chat(
       parsedResponse.errorAlert = toolErrors.join(' | ');
     }
     return parsedResponse;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Gemini] API call failed:', error);
-    return FALLBACK_MESSAGE;
+    return {
+      ...FALLBACK_MESSAGE,
+      errorAlert: `AI service error: ${error.message || 'Unknown failure'}. Please try again.`,
+    };
   }
 }
