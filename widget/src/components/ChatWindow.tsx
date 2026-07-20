@@ -11,6 +11,7 @@ import { ChatMessage } from '../types';
 interface ChatWindowProps {
   messages: ChatMessage[];
   isTyping: boolean;
+  errorAlert?: string | null;
   onSend: (text: string) => void;
   onClose: () => void;
 }
@@ -18,6 +19,7 @@ interface ChatWindowProps {
 export const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
   isTyping,
+  errorAlert,
   onSend,
   onClose,
 }) => {
@@ -46,6 +48,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           </svg>
         </button>
       </div>
+
+      {/* Error Alert */}
+      {errorAlert && (
+        <div style={{
+          backgroundColor: '#fee2e2',
+          color: '#ef4444',
+          padding: '8px 12px',
+          fontSize: '12px',
+          textAlign: 'center',
+          borderBottom: '1px solid #fca5a5',
+          zIndex: 10
+        }}>
+          ⚠️ {errorAlert}
+        </div>
+      )}
 
       {/* Messages */}
       <MessageList messages={messages} isTyping={isTyping} onSend={onSend} />

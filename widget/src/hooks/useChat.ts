@@ -31,14 +31,14 @@ function saveHistory(history: ChatMessage[]) {
 export function useChat(sessionId: string) {
   const [messages, setMessages] = useState<ChatMessage[]>(loadHistory);
   const [isTyping, setIsTyping] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorAlert, setErrorAlert] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const send = useCallback(
     async (text: string) => {
       if (!text.trim() || isTyping) return;
 
-      setError(null);
+      setErrorAlert(null);
 
       // Add user message immediately
       const userMessage: ChatMessage = {
@@ -60,6 +60,11 @@ export function useChat(sessionId: string) {
           message: text.trim(),
           history: messages, // Send history BEFORE this message (server adds it)
         });
+
+        if (response.errorAlert) {
+          setErrorAlert(response.errorAlert);
+          setTimeout(() => setErrorAlert(null), 5000);
+        }
 
         // Add assistant reply
         const assistantMessage: ChatMessage = {
@@ -92,8 +97,8 @@ export function useChat(sessionId: string) {
   const clearChat = useCallback(() => {
     setMessages([]);
     saveHistory([]);
-    setError(null);
+    setErrorAlert(null);
   }, []);
 
-  return { messages, isTyping, error, send, clearChat };
+  return { messages, isTyping, errorAlert, send, clearChat };
 }

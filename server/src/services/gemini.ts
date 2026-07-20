@@ -51,6 +51,7 @@ function parseGeminiResponse(raw: string): GeminiParsedResponse {
       summary: parsed.summary || undefined,
       requiresVerification: Boolean(parsed.requiresVerification),
       emailToVerify: parsed.emailToVerify || undefined,
+      errorAlert: parsed.errorAlert || undefined,
     };
   } catch {
     console.warn('[Gemini] Failed to parse JSON response, using raw text');
@@ -171,6 +172,7 @@ export async function chat(
 
     // Handle tool calls in a loop (up to 3 times to prevent infinite loops)
     let loopCount = 0;
+    const toolErrors: string[] = [];
     while (calls && calls.length > 0 && loopCount < 3) {
       loopCount++;
       const call = calls[0];
@@ -232,7 +234,9 @@ export async function chat(
           apiResponse = { verified: success };
         }
       } catch (err: any) {
-        apiResponse = { error: err.message || 'Tool execution failed' };
+        const errorMsg = err.message || 'Tool execution failed';
+        apiResponse = { error: errorMsg };
+        toolErrors.push(errorMsg);
       }
 
       // Send the result back to Gemini
@@ -251,7 +255,11 @@ export async function chat(
       return FALLBACK_MESSAGE;
     }
 
-    return parseGeminiResponse(responseText);
+    const parsedResponse = parseGeminiResponse(responseText);
+    if (toolErrors.length > 0) {
+      parsedResponse.errorAlert = toolErrors.join(' | ');
+    }
+    return parsedResponse;
   } catch (error) {
     console.error('[Gemini] API call failed:', error);
     return FALLBACK_MESSAGE;

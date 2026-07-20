@@ -40,7 +40,8 @@ router.post('/', async (req: Request, res: Response) => {
       } catch (err: any) {
         console.error('[Chat] Failed to send OTP:', err);
         const reason = err.message || 'unknown error';
-        geminiResponse.reply = `I'm sorry, but I couldn't send the verification code to that email address (${reason}). Could you please double-check your email or provide a different one?`;
+        geminiResponse.errorAlert = reason;
+        geminiResponse.reply = `I'm sorry, but I couldn't send the verification code to that email address. Could you please double-check your email or provide a different one?`;
         geminiResponse.requiresVerification = false;
       }
     }
@@ -98,6 +99,7 @@ router.post('/', async (req: Request, res: Response) => {
     const response: ChatResponse = {
       reply: geminiResponse.reply,
       leadCaptured,
+      errorAlert: geminiResponse.errorAlert,
     };
 
     res.json(response);

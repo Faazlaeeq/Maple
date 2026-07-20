@@ -12,7 +12,7 @@ import { useChat } from './hooks/useChat';
 export const App: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const sessionId = useSession();
-  const { messages, isTyping, send } = useChat(sessionId);
+  const { messages, isTyping, errorAlert, send } = useChat(sessionId);
 
   const toggle = () => setIsOpen((prev) => !prev);
 
@@ -23,6 +23,7 @@ export const App: React.FC = () => {
         <ChatWindow
           messages={messages}
           isTyping={isTyping}
+          errorAlert={errorAlert}
           onSend={send}
           onClose={toggle}
         />

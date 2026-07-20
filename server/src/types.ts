@@ -21,6 +21,7 @@ export interface ChatRequest {
 export interface ChatResponse {
   reply: string;
   leadCaptured: boolean;
+  errorAlert?: string;
 }
 
 /** Contact method type */
@@ -54,6 +55,7 @@ export interface GeminiParsedResponse {
   summary?: string;
   requiresVerification?: boolean;
   emailToVerify?: string;
+  errorAlert?: string;
 }
 
 /** Clinic Profile (Multi-tenant) */
