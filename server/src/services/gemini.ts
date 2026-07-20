@@ -158,7 +158,6 @@ export async function chat(
     generationConfig: {
       temperature: 0.7,
       topP: 0.9,
-      responseMimeType: "application/json",
     },
   });
 
