@@ -37,9 +37,10 @@ router.post('/', async (req: Request, res: Response) => {
     if (geminiResponse.requiresVerification && geminiResponse.emailToVerify) {
       try {
         await sendVerificationOtp(geminiResponse.emailToVerify, profile);
-      } catch (err) {
+      } catch (err: any) {
         console.error('[Chat] Failed to send OTP:', err);
-        geminiResponse.reply = "I'm sorry, but I couldn't send the verification code to that email address. Could you please double-check your email or provide a different one?";
+        const reason = err.message || 'unknown error';
+        geminiResponse.reply = `I'm sorry, but I couldn't send the verification code to that email address (${reason}). Could you please double-check your email or provide a different one?`;
         geminiResponse.requiresVerification = false;
       }
     }

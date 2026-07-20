@@ -51,9 +51,9 @@ export async function sendVerificationOtp(contact: string, profile: ClinicProfil
         .create({ to: contact, channel: 'sms' });
       console.log(`[Twilio] OTP sent to ${contact}`);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(`[OTP] Error sending OTP to ${contact}:`, error);
-    throw new Error('Failed to send verification code.');
+    throw new Error(error.message || 'Failed to send verification code.');
   }
 }
 

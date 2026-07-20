@@ -122,7 +122,21 @@ export async function sendOtpEmail(email: string, code: string, profile: ClinicP
 
     if (error) {
       console.error('[Email] Resend API Error for OTP:', error);
-      throw new Error('Failed to send verification code to email.');
+      throw new Error(`Failed to send email: ${error.message}`);
+    }
+
+    // Wait briefly and check status to catch immediate bounces/suppressions
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const statusCheck = await resend.emails.get(data?.id || '');
+      const state = statusCheck.data?.last_event || '';
+      
+      if (state === 'bounced' || state === 'complained') {
+        throw new Error('Email bounced. This email address might be invalid, fake, or no longer exists.');
+      }
+    } catch (statusErr: any) {
+      if (statusErr.message.includes('bounced')) throw statusErr;
+      // Ignore other fetch errors, assume delivered
     }
 
     return true;
