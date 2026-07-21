@@ -148,14 +148,19 @@ export async function chat(
               throw new Error("GUARDRAIL FAILED: You must verify the user's email address first using OTP before booking.");
             }
 
-            const timezone = (profile as any).timezone || 'UTC';
             const availableSlots = await getAvailableSlots(args.date, profile.googleCalendarId, timezone);
             if (!availableSlots.includes(args.time)) {
               throw new Error(`GUARDRAIL FAILED: The time ${args.time} is already booked or unavailable on ${args.date}. Available slots are: ${availableSlots.join(', ')}. Apologize to the user and ask them to pick one of the available slots.`);
             }
 
             const userBookings = await getUserBookings(args.email, profile.id);
-            const activeBooking = userBookings.find(b => b.status === 'booked' && new Date(`${b.date}T${b.time}:00`) >= new Date());
+            const activeBooking = userBookings.find(b => {
+              if (b.status !== 'booked') return false;
+              const nowInTz = new Date().toLocaleString('sv-SE', { timeZone: timezone });
+              const bookingDateTimeStr = `${b.date} ${b.time}:00`;
+              return bookingDateTimeStr >= nowInTz;
+            });
+            
             if (activeBooking) {
               throw new Error(`GUARDRAIL FAILED: The user already has an active booking on ${activeBooking.date} at ${activeBooking.time}. They must cancel it first before booking another one. Inform the user of this policy.`);
             }
@@ -183,8 +188,17 @@ export async function chat(
           } else if (call.function.name === 'cancel_appointment') {
             const booking = await getBookingById(args.bookingId);
             if (booking) {
-              const bookingTime = new Date(`${booking.date}T${booking.time}:00`);
-              const diffMs = bookingTime.getTime() - new Date().getTime();
+              const timezone = (profile as any).timezone || 'UTC';
+              
+              // Get current time in the clinic's timezone
+              const nowInTzStr = new Date().toLocaleString('en-US', { timeZone: timezone });
+              const nowInTz = new Date(nowInTzStr).getTime();
+              
+              // Get booking time in the clinic's timezone
+              // (Since we feed it to new Date() without a Z, it assumes the local timezone of the JS environment, which matches the nowInTz logic)
+              const bookingTime = new Date(`${booking.date}T${booking.time}:00`).getTime();
+              
+              const diffMs = bookingTime - nowInTz;
               const hoursDiff = diffMs / (1000 * 60 * 60);
               
               if (hoursDiff > 0 && hoursDiff < 3) {
