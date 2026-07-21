@@ -10,6 +10,7 @@ import { ChatMessage, GeminiParsedResponse, ClinicProfile } from '../types';
 import { getAvailableSlots, bookAppointment, cancelAppointment } from './calendar';
 import { checkVerificationOtp } from './twilio';
 import { sendBookingConfirmation, sendBookingNotificationToClinic, sendCancellationToPatient, sendCancellationToClinic } from './email';
+import { saveBooking, getUserBookings, getBookingById, updateBookingStatus } from './firestore';
 
 function buildSystemPrompt(profile: ClinicProfile): string {
   return profile.systemPrompt
@@ -240,6 +241,19 @@ export async function chat(
 
           // Double Booking Prevention
           const timezone = (profile as any).timezone || 'UTC';
+          
+          const userBookings = await getUserBookings(args.email as string, profile.id);
+          const activeBooking = userBookings.find(b => {
+            if (b.status !== 'booked') return false;
+            const nowInTz = new Date().toLocaleString('sv-SE', { timeZone: timezone });
+            const bookingDateTimeStr = `${b.date} ${b.time}:00`;
+            return bookingDateTimeStr >= nowInTz;
+          });
+          
+          if (activeBooking) {
+            throw new Error(`GUARDRAIL FAILED: The user already has an active booking on ${activeBooking.date} at ${activeBooking.time}. They must cancel it first before booking another one. Inform the user of this policy.`);
+          }
+
           const availableSlots = await getAvailableSlots(args.date as string, profile.googleCalendarId, timezone);
           if (!availableSlots.includes(args.time as string)) {
             throw new Error(`GUARDRAIL FAILED: The time ${args.time} is already booked or unavailable on ${args.date}. Available slots are: ${availableSlots.join(', ')}. Apologize to the user and ask them to pick one of the available slots.`);
@@ -253,6 +267,17 @@ export async function chat(
             profile.googleCalendarId,
             timezone
           );
+          
+          await saveBooking({
+            bookingId: res.bookingId,
+            email: args.email as string,
+            date: args.date as string,
+            time: args.time as string,
+            status: 'booked',
+            clinicId: profile.id,
+            eventId: res.eventId,
+            createdAt: new Date().toISOString()
+          });
           
           // Send confirmation email synchronously so Vercel doesn't kill it
           try {
@@ -281,7 +306,26 @@ export async function chat(
             profile
           ).catch(err => console.error('[Email] Booking notification to clinic failed:', err));
         } else if (call.name === 'cancel_appointment') {
+          const booking = await getBookingById(args.bookingId as string);
+          if (booking) {
+            const timezone = (profile as any).timezone || 'UTC';
+            
+            const nowInTzStr = new Date().toLocaleString('en-US', { timeZone: timezone });
+            const nowInTz = new Date(nowInTzStr).getTime();
+            const bookingTime = new Date(`${booking.date}T${booking.time}:00`).getTime();
+            
+            const diffMs = bookingTime - nowInTz;
+            const hoursDiff = diffMs / (1000 * 60 * 60);
+            
+            if (hoursDiff > 0 && hoursDiff < 3) {
+              throw new Error("GUARDRAIL FAILED: The user cannot cancel their appointment if it is less than 3 hours away. Inform them they must call the clinic directly to cancel.");
+            }
+          }
+
           const cancelResult = await cancelAppointment(args.bookingId as string, profile.googleCalendarId);
+          if (booking) {
+            await updateBookingStatus(args.bookingId as string, 'canceled');
+          }
           apiResponse = { success: true, bookingId: cancelResult.bookingId };
 
           // Send cancellation emails (non-blocking)
