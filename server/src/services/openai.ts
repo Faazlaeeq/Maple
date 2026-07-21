@@ -148,6 +148,7 @@ export async function chat(
               throw new Error("GUARDRAIL FAILED: You must verify the user's email address first using OTP before booking.");
             }
 
+            const timezone = (profile as any).timezone || 'UTC';
             const availableSlots = await getAvailableSlots(args.date, profile.googleCalendarId, timezone);
             if (!availableSlots.includes(args.time)) {
               throw new Error(`GUARDRAIL FAILED: The time ${args.time} is already booked or unavailable on ${args.date}. Available slots are: ${availableSlots.join(', ')}. Apologize to the user and ask them to pick one of the available slots.`);
