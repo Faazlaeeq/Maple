@@ -322,7 +322,7 @@ export async function chat(
             }
           }
 
-          const cancelResult = await cancelAppointment(args.bookingId as string, profile.googleCalendarId);
+          const cancelResult = await cancelAppointment(args.bookingId as string, profile.googleCalendarId, booking?.eventId);
           if (booking) {
             await updateBookingStatus(args.bookingId as string, 'canceled');
           }
@@ -378,7 +378,9 @@ export async function chat(
 
     const parsedResponse = parseGeminiResponse(responseText);
     if (toolErrors.length > 0) {
-      parsedResponse.errorAlert = toolErrors.join(' | ');
+      parsedResponse.errorAlert = toolErrors
+        .map(e => e.replace(/GUARDRAIL FAILED:\s*/g, ''))
+        .join(' | ');
     }
     return parsedResponse;
   } catch (error: any) {

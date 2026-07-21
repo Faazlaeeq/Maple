@@ -159,7 +159,7 @@ export interface CancelledEventDetails {
  * Searches calendar events to find the one whose description contains the booking ID,
  * then deletes that event. Returns event details for notification emails.
  */
-export async function cancelAppointment(bookingId: string, calendarId: string): Promise<CancelledEventDetails> {
+export async function cancelAppointment(bookingId: string, calendarId: string, eventId?: string): Promise<CancelledEventDetails> {
   const client = getCalendarClient(calendarId);
 
   if (!client) {
@@ -170,25 +170,42 @@ export async function cancelAppointment(bookingId: string, calendarId: string): 
   try {
     await client.auth.authorize();
 
-    // Search events in the next 90 days for one matching this booking ID
-    const now = new Date();
-    const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
-    const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days ahead
+    let matchingEvent: any = null;
 
-    const response = await client.calendar.events.list({
-      calendarId: client.calendarId,
-      timeMin,
-      timeMax,
-      singleEvents: true,
-      q: bookingId, // Search query — looks in summary + description
-    });
+    if (eventId) {
+      // If we have the exact eventId, bypass the search index and fetch it directly!
+      try {
+        const getRes = await client.calendar.events.get({
+          calendarId: client.calendarId,
+          eventId: eventId,
+        });
+        matchingEvent = getRes.data;
+      } catch (err) {
+        console.warn(`[Calendar] Failed to fetch event directly by ID ${eventId}, falling back to search...`);
+      }
+    }
 
-    const events = response.data.items || [];
-    const matchingEvent = events.find(
-      (event: any) =>
-        (event.description && event.description.includes(bookingId)) ||
-        (event.summary && event.summary.includes(bookingId))
-    );
+    if (!matchingEvent) {
+      // Search events in the next 90 days for one matching this booking ID
+      const now = new Date();
+      const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
+      const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days ahead
+
+      const response = await client.calendar.events.list({
+        calendarId: client.calendarId,
+        timeMin,
+        timeMax,
+        singleEvents: true,
+        q: bookingId, // Search query — looks in summary + description
+      });
+
+      const events = response.data.items || [];
+      matchingEvent = events.find(
+        (event: any) =>
+          (event.description && event.description.includes(bookingId)) ||
+          (event.summary && event.summary.includes(bookingId))
+      );
+    }
 
     if (!matchingEvent || !matchingEvent.id) {
       throw new Error(`No appointment found with Booking ID: ${bookingId}. Please double-check the ID and try again.`);
