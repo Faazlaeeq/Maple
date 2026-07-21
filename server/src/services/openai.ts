@@ -3,6 +3,7 @@ import { ChatMessage, GeminiParsedResponse, ClinicProfile } from '../types';
 import { getAvailableSlots, bookAppointment, cancelAppointment } from './calendar';
 import { checkVerificationOtp } from './twilio';
 import { sendBookingConfirmation } from './email';
+import { saveBooking, getUserBookings, getBookingById, updateBookingStatus } from './firestore';
 
 function buildSystemPrompt(profile: ClinicProfile): string {
   return profile.systemPrompt
@@ -153,7 +154,24 @@ export async function chat(
               throw new Error(`GUARDRAIL FAILED: The time ${args.time} is already booked or unavailable on ${args.date}. Available slots are: ${availableSlots.join(', ')}. Apologize to the user and ask them to pick one of the available slots.`);
             }
 
+            const userBookings = await getUserBookings(args.email, profile.id);
+            const activeBooking = userBookings.find(b => b.status === 'booked' && new Date(`${b.date}T${b.time}:00`) >= new Date());
+            if (activeBooking) {
+              throw new Error(`GUARDRAIL FAILED: The user already has an active booking on ${activeBooking.date} at ${activeBooking.time}. They must cancel it first before booking another one. Inform the user of this policy.`);
+            }
+
             const res = await bookAppointment(args.date, args.time, args.patientName, args.phone, profile.googleCalendarId, timezone);
+            
+            await saveBooking({
+              bookingId: res.bookingId,
+              email: args.email,
+              date: args.date,
+              time: args.time,
+              status: 'booked',
+              clinicId: profile.id,
+              eventId: res.eventId,
+              createdAt: new Date().toISOString()
+            });
             
             try {
               await sendBookingConfirmation(args.email, args.patientName, args.date, args.time, res.bookingId, profile);
@@ -163,8 +181,22 @@ export async function chat(
 
             apiResponse = { success: true, bookingId: res.bookingId, eventId: res.eventId };
           } else if (call.function.name === 'cancel_appointment') {
-            const success = await cancelAppointment(args.bookingId, profile.googleCalendarId);
-            apiResponse = { success };
+            const booking = await getBookingById(args.bookingId);
+            if (booking) {
+              const bookingTime = new Date(`${booking.date}T${booking.time}:00`);
+              const diffMs = bookingTime.getTime() - new Date().getTime();
+              const hoursDiff = diffMs / (1000 * 60 * 60);
+              
+              if (hoursDiff > 0 && hoursDiff < 3) {
+                throw new Error("GUARDRAIL FAILED: The user cannot cancel their appointment if it is less than 3 hours away. Inform them they must call the clinic directly to cancel.");
+              }
+            }
+
+            const details = await cancelAppointment(args.bookingId, profile.googleCalendarId);
+            if (booking) {
+              await updateBookingStatus(args.bookingId, 'canceled');
+            }
+            apiResponse = { success: true, details };
           } else if (call.function.name === 'verify_otp') {
             const success = await checkVerificationOtp(args.email, args.code);
             apiResponse = { verified: success };

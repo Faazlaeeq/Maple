@@ -58,6 +58,18 @@ export interface GeminiParsedResponse {
   errorAlert?: string;
 }
 
+/** A saved booking record */
+export interface BookingRecord {
+  bookingId: string;
+  email: string;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:mm
+  status: 'booked' | 'canceled' | 'completed';
+  clinicId: string;
+  eventId: string;
+  createdAt: string; // ISO 8601
+}
+
 /** Clinic Profile (Multi-tenant) */
 export interface ClinicProfile {
   id: string;

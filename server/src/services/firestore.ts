@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────
 
 import admin from 'firebase-admin';
-import { LeadRecord, ClinicProfile } from '../types';
+import { LeadRecord, ClinicProfile, BookingRecord } from '../types';
 import fs from 'fs';
 import path from 'path';
 
@@ -219,6 +219,76 @@ export async function getOtp(email: string): Promise<string | null> {
   } catch (error) {
     console.error('[Firestore] Failed to get OTP:', error);
     return null;
+  }
+}
+
+// ── Booking Storage ──
+const inMemoryBookings: BookingRecord[] = [];
+
+export async function saveBooking(booking: BookingRecord): Promise<void> {
+  const db = getDb();
+  if (db) {
+    try {
+      await db.collection('bookings').doc(booking.bookingId).set(booking);
+      console.log(`[Firestore] Booking saved: ${booking.bookingId}`);
+      return;
+    } catch (error) {
+      console.error('[Firestore] Failed to save booking:', error);
+    }
+  }
+  
+  inMemoryBookings.push(booking);
+  console.log(`[Memory] Booking saved: ${booking.bookingId}`);
+}
+
+export async function getUserBookings(email: string, clinicId: string): Promise<BookingRecord[]> {
+  const db = getDb();
+  if (db) {
+    try {
+      const snapshot = await db.collection('bookings')
+        .where('email', '==', email)
+        .where('clinicId', '==', clinicId)
+        .get();
+      
+      return snapshot.docs.map(doc => doc.data() as BookingRecord);
+    } catch (error) {
+      console.error('[Firestore] Failed to get user bookings:', error);
+    }
+  }
+
+  return inMemoryBookings.filter(b => b.email === email && b.clinicId === clinicId);
+}
+
+export async function getBookingById(bookingId: string): Promise<BookingRecord | null> {
+  const db = getDb();
+  if (db) {
+    try {
+      const doc = await db.collection('bookings').doc(bookingId).get();
+      if (doc.exists) {
+        return doc.data() as BookingRecord;
+      }
+    } catch (error) {
+      console.error('[Firestore] Failed to get booking by ID:', error);
+    }
+  }
+
+  return inMemoryBookings.find(b => b.bookingId === bookingId) || null;
+}
+
+export async function updateBookingStatus(bookingId: string, status: BookingRecord['status']): Promise<void> {
+  const db = getDb();
+  if (db) {
+    try {
+      await db.collection('bookings').doc(bookingId).update({ status });
+      return;
+    } catch (error) {
+      console.error('[Firestore] Failed to update booking status:', error);
+    }
+  }
+
+  const booking = inMemoryBookings.find(b => b.bookingId === bookingId);
+  if (booking) {
+    booking.status = status;
   }
 }
 
